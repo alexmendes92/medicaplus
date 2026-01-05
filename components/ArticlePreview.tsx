@@ -74,7 +74,7 @@ const ArticlePreview: React.FC<ArticlePreviewProps> = ({ article, onConvertToPos
             <div className={`flex-1 bg-white shadow-lg rounded-xl border border-slate-200 overflow-hidden flex flex-col font-sans animate-fadeIn h-full ${mobileTab === 'audit' ? 'hidden lg:flex' : 'flex'}`}>
                 
                 {/* Actions Header */}
-                <div className="h-16 bg-white border-b border-slate-100 flex items-center justify-between px-4 flex-shrink-0">
+                <div className="h-16 bg-white border-b border-slate-100 flex items-center justify-between px-4 flex-shrink-0 sticky top-0 z-10">
                     <div className="flex flex-col">
                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Blog Médico</span>
                         <span className="text-xs font-bold text-slate-900">ARTIGO SEO (PRIORIDADE)</span>
@@ -134,7 +134,7 @@ const ArticlePreview: React.FC<ArticlePreviewProps> = ({ article, onConvertToPos
             </div>
 
             {/* Sidebar: Compliance Audit - Hidden on mobile if Content tab is active */}
-            <div className={`w-full lg:w-80 flex-shrink-0 overflow-y-auto ${mobileTab === 'content' ? 'hidden lg:block' : 'block'}`}>
+            <div className={`w-full lg:w-80 flex-shrink-0 overflow-y-auto sticky top-4 h-[calc(100vh-2rem)] ${mobileTab === 'content' ? 'hidden lg:block' : 'block'}`}>
                  <CFMComplianceGuide contentToAudit={getCleanText()} />
             </div>
         </div>

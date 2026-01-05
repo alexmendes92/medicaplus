@@ -314,7 +314,7 @@ const ArticleWizard: React.FC<ArticleWizardProps> = ({ onGenerate, isGenerating,
         </div>
 
         {/* Navigation / Loading Animation - Fixed Footer Style */}
-        <div className="pt-4 border-t border-slate-100 bg-white -mx-4 px-6 pb-6 mt-auto z-10">
+        <div className="pt-4 border-t border-slate-100 bg-white -mx-4 px-6 pb-6 mt-auto z-10 sticky bottom-0">
              {isGenerating ? (
                  <div className="w-full flex flex-col items-center justify-center py-2 animate-fadeIn">
                      <div className="flex gap-1 mb-2">
