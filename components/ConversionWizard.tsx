@@ -29,10 +29,10 @@ const ConversionWizard: React.FC<ConversionWizardProps> = ({ onGenerate, isGener
   ];
 
   return (
-    <div className="flex flex-col h-full animate-fadeIn pb-24 lg:pb-0">
+    <div className="flex flex-col h-full min-h-full animate-fadeIn pb-24 lg:pb-0">
         
         {/* Step Indicator */}
-        <div className="flex items-center justify-between mb-8 px-2">
+        <div className="flex items-center justify-between mb-8 px-2 shrink-0">
             <div className={`flex flex-col items-center gap-2 ${step === 1 ? 'text-red-600' : 'text-slate-400'}`}>
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2 ${step === 1 ? 'border-red-600 bg-red-50' : 'border-slate-200'}`}>1</div>
                 <span className="text-[10px] font-bold uppercase">Estratégia</span>
@@ -139,7 +139,7 @@ const ConversionWizard: React.FC<ConversionWizardProps> = ({ onGenerate, isGener
         </div>
 
         {/* Navigation / Animation - Fixed Footer */}
-        <div className="pt-6 mt-auto border-t border-slate-100 bg-white z-10 flex items-center gap-3">
+        <div className="pt-6 mt-auto border-t border-slate-100 bg-white z-10 flex items-center gap-3 sticky bottom-0">
              {isGenerating ? (
                  <div className="w-full flex flex-col items-center justify-center py-4 animate-fadeIn">
                      <div className="relative mb-3">

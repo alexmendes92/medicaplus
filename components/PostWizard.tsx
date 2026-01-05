@@ -122,9 +122,9 @@ const PostWizard: React.FC<PostWizardProps> = ({ onGenerate, isGenerating, initi
   const progress = (step / 3) * 100;
 
   return (
-    <div className="flex flex-col h-full animate-fadeIn w-full">
+    <div className="flex flex-col h-full min-h-full animate-fadeIn w-full">
         {/* Header Progress */}
-        <div className="mb-6 px-2">
+        <div className="mb-6 px-2 shrink-0">
             <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">
                 <span>Passo {step} de 3</span>
                 <span>{step === 1 ? 'Formato' : step === 2 ? 'Conteúdo' : 'Estilo'}</span>
@@ -338,8 +338,8 @@ const PostWizard: React.FC<PostWizardProps> = ({ onGenerate, isGenerating, initi
             )}
         </div>
 
-        {/* Bottom Actions - Fixed Style for Desktop */}
-        <div className="pt-4 border-t border-slate-100 bg-white -mx-4 px-6 pb-6 mt-auto z-10">
+        {/* Bottom Actions - Sticky Footer for Desktop */}
+        <div className="pt-4 border-t border-slate-100 bg-white -mx-4 px-6 pb-6 mt-auto z-10 sticky bottom-0">
             {isGenerating ? (
                 <div className="w-full py-2 animate-fadeIn">
                     <div className="flex justify-between mb-2 px-1">

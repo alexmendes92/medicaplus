@@ -110,10 +110,10 @@ const ArticleWizard: React.FC<ArticleWizardProps> = ({ onGenerate, isGenerating,
   const stepTitles = ['Conceito', 'Persona', 'Dores', 'Estilo', 'SEO'];
 
   return (
-    <div className="flex flex-col h-full animate-fadeIn pb-24 lg:pb-0">
+    <div className="flex flex-col h-full min-h-full animate-fadeIn pb-24 lg:pb-0">
         
         {/* Progress Header */}
-        <div className="mb-6 px-1">
+        <div className="mb-6 px-1 shrink-0">
              <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
                 <span>Fase {step} de 5</span>
                 <span>{stepTitles[step - 1]}</span>

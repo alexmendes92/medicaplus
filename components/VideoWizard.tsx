@@ -107,7 +107,7 @@ const VideoWizard: React.FC = () => {
   if (scriptResult) {
       return (
           <div className="h-full flex flex-col animate-fadeIn">
-              <div className="p-4 bg-slate-900 border-b border-slate-800 flex justify-between items-center text-white">
+              <div className="p-4 bg-slate-900 border-b border-slate-800 flex justify-between items-center text-white shrink-0">
                   <button onClick={() => setScriptResult(null)} className="text-xs font-bold text-slate-400 hover:text-white uppercase tracking-widest flex items-center gap-2">
                       <ArrowRight className="w-4 h-4 rotate-180" /> Voltar ao Studio
                   </button>
@@ -124,7 +124,7 @@ const VideoWizard: React.FC = () => {
   if (blogResult) {
       return (
           <div className="h-full flex flex-col animate-fadeIn">
-              <div className="p-4 bg-slate-900 border-b border-slate-800 flex justify-between items-center text-white">
+              <div className="p-4 bg-slate-900 border-b border-slate-800 flex justify-between items-center text-white shrink-0">
                   <button onClick={() => setBlogResult(null)} className="text-xs font-bold text-slate-400 hover:text-white uppercase tracking-widest flex items-center gap-2">
                       <ArrowRight className="w-4 h-4 rotate-180" /> Voltar ao Studio
                   </button>
@@ -139,7 +139,7 @@ const VideoWizard: React.FC = () => {
   }
 
   return (
-    <div className="h-full flex flex-col bg-slate-950 pb-24 lg:pb-0 animate-fadeIn relative overflow-hidden">
+    <div className="h-full min-h-full flex flex-col bg-slate-950 pb-24 lg:pb-0 animate-fadeIn relative overflow-hidden">
         
         {/* Background Effects */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-red-900/20 rounded-full blur-[100px] pointer-events-none"></div>
@@ -298,7 +298,7 @@ const VideoWizard: React.FC = () => {
         </div>
 
         {/* Fixed Footer for Actions */}
-        <div className="p-6 border-t border-slate-900 bg-slate-950 z-20 shrink-0">
+        <div className="p-6 border-t border-slate-900 bg-slate-950 z-20 shrink-0 mt-auto sticky bottom-0">
             <div className="max-w-2xl mx-auto">
                 {activeTab === 'script' ? (
                     <button 

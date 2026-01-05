@@ -20,10 +20,10 @@ const InfographicWizard: React.FC<InfographicWizardProps> = ({ onGenerate, isGen
   };
 
   return (
-    <div className="flex flex-col h-full animate-fadeIn pb-24 lg:pb-0">
+    <div className="flex flex-col h-full min-h-full animate-fadeIn pb-24 lg:pb-0">
         
         {/* Simple Steps */}
-        <div className="flex gap-2 mb-8">
+        <div className="flex gap-2 mb-8 shrink-0">
             <div className={`h-1.5 flex-1 rounded-full transition-colors ${step >= 1 ? 'bg-indigo-500' : 'bg-slate-100'}`} />
             <div className={`h-1.5 flex-1 rounded-full transition-colors ${step >= 2 ? 'bg-indigo-500' : 'bg-slate-100'}`} />
         </div>
@@ -105,7 +105,7 @@ const InfographicWizard: React.FC<InfographicWizardProps> = ({ onGenerate, isGen
         </div>
 
          {/* Navigation / Animation - Fixed Footer */}
-         <div className="pt-6 mt-auto border-t border-slate-100 bg-white z-10 flex items-center gap-3">
+         <div className="pt-6 mt-auto border-t border-slate-100 bg-white z-10 flex items-center gap-3 sticky bottom-0">
              {isGenerating ? (
                  <div className="w-full flex flex-col items-center justify-center py-4 animate-fadeIn">
                      <div className="relative mb-3">
