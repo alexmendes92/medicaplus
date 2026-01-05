@@ -411,9 +411,9 @@ function App() {
                                 )}
 
                                 {viewMode === 'post' && <div className="h-full flex flex-col p-4 pb-32 lg:pb-0"><PostWizard onGenerate={handleGeneratePost} isGenerating={postLoading} initialState={wizardInitialState} /></div>}
-                                {viewMode === 'seo' && <div className="p-4 pb-32 lg:pb-0"><ArticleWizard onGenerate={handleGenerateArticle} isGenerating={articleLoading} initialState={articleWizardState} /></div>}
-                                {viewMode === 'infographic' && <div className="p-4 pb-32 lg:pb-0"><InfographicWizard onGenerate={handleGenerateInfographic} isGenerating={infographicLoading} /></div>}
-                                {viewMode === 'conversion' && <div className="p-4 pb-32 lg:pb-0"><ConversionWizard onGenerate={handleGenerateConversion} isGenerating={conversionLoading} /></div>}
+                                {viewMode === 'seo' && <div className="h-full flex flex-col p-4 pb-32 lg:pb-0"><ArticleWizard onGenerate={handleGenerateArticle} isGenerating={articleLoading} initialState={articleWizardState} /></div>}
+                                {viewMode === 'infographic' && <div className="h-full flex flex-col p-4 pb-32 lg:pb-0"><InfographicWizard onGenerate={handleGenerateInfographic} isGenerating={infographicLoading} /></div>}
+                                {viewMode === 'conversion' && <div className="h-full flex flex-col p-4 pb-32 lg:pb-0"><ConversionWizard onGenerate={handleGenerateConversion} isGenerating={conversionLoading} /></div>}
                                 {viewMode === 'materials' && <MaterialsLibrary onUseArticle={handleUseEvidence} />}
                                 {viewMode === 'trends' && <TrendAnalyzer onUseTrend={handleUseTrend} />}
                                 {viewMode === 'calculator' && <ReturnToSportCalculator userProfile={userProfile} />}
