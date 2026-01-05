@@ -11,11 +11,8 @@ import {
   BookOpen,
   Route,
   PieChart,
-  Globe,
   QrCode,
-  MessageCircle,
   Calculator,
-  Users,
   Settings
 } from 'lucide-react';
 import Header from './components/Header';
@@ -316,7 +313,7 @@ function App() {
           </nav>
 
           <div className="p-4 border-t border-slate-200">
-              <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100" onClick={() => setViewMode('settings')}>
+              <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100 cursor-pointer" onClick={() => setViewMode('settings')}>
                   {userProfile.photoUrl ? (
                       <img src={userProfile.photoUrl} className="w-8 h-8 rounded-full object-cover bg-slate-200" alt="User" />
                   ) : (
@@ -353,7 +350,7 @@ function App() {
           )}
 
           {/* Main Scrollable Area */}
-          <main className="flex-1 overflow-hidden relative flex flex-col w-full">
+          <main className="flex-1 overflow-hidden relative flex flex-col w-full transition-all duration-300">
               
               {/* DASHBOARD VIEW */}
               {viewMode === 'dashboard' && (

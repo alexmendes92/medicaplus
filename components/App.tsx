@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutGrid,
@@ -11,44 +10,41 @@ import {
   BookOpen,
   Route,
   PieChart,
-  Globe,
   QrCode,
-  MessageCircle,
   Calculator,
-  Users,
   Settings
 } from 'lucide-react';
-import Header from './components/Header';
-import Dashboard from './components/Dashboard';
-import PostWizard from './components/PostWizard';
-import ArticleWizard from './components/ArticleWizard';
-import InfographicWizard from './components/InfographicWizard';
-import ConversionWizard from './components/ConversionWizard';
-import TrendAnalyzer from './components/TrendAnalyzer';
-import ReturnToSportCalculator from './components/ReturnToSportCalculator';
-import AnatomyLibrary from './components/AnatomyLibrary';
-import DigitalBusinessCard from './components/DigitalBusinessCard';
-import PostPreview from './components/PostPreview';
-import ArticlePreview from './components/ArticlePreview';
-import InfographicPreview from './components/InfographicPreview';
-import ConversionPreview from './components/ConversionPreview';
-import MaterialsLibrary from './components/MaterialsLibrary';
-import SiteContentList from './components/SiteContentList';
-import PublicationsList from './components/PublicationsList';
-import ScoreCalculator from './components/ScoreCalculator';
-import FraxCalculator from './components/FraxCalculator';
-import VisualPrescription from './components/VisualPrescription';
-import MedicalNewsFeed from './components/MedicalNewsFeed';
-import PatientJourney from './components/PatientJourney';
-import VideoWizard from './components/VideoWizard';
-import ClinicalSuite from './components/ClinicalSuite';
-import MarketingROI from './components/MarketingROI';
-import PatientManager from './components/PatientManager';
-import CalculatorsMenu from './components/CalculatorsMenu';
-import ProfileSettings from './components/ProfileSettings';
+import Header from './Header';
+import Dashboard from './Dashboard';
+import PostWizard from './PostWizard';
+import ArticleWizard from './ArticleWizard';
+import InfographicWizard from './InfographicWizard';
+import ConversionWizard from './ConversionWizard';
+import TrendAnalyzer from './TrendAnalyzer';
+import ReturnToSportCalculator from './ReturnToSportCalculator';
+import AnatomyLibrary from './AnatomyLibrary';
+import DigitalBusinessCard from './DigitalBusinessCard';
+import PostPreview from './PostPreview';
+import ArticlePreview from './ArticlePreview';
+import InfographicPreview from './InfographicPreview';
+import ConversionPreview from './ConversionPreview';
+import MaterialsLibrary from './MaterialsLibrary';
+import SiteContentList from './SiteContentList';
+import PublicationsList from './PublicationsList';
+import ScoreCalculator from './ScoreCalculator';
+import FraxCalculator from './FraxCalculator';
+import VisualPrescription from './VisualPrescription';
+import MedicalNewsFeed from './MedicalNewsFeed';
+import PatientJourney from './PatientJourney';
+import VideoWizard from './VideoWizard';
+import ClinicalSuite from './ClinicalSuite';
+import MarketingROI from './MarketingROI';
+import PatientManager from './PatientManager';
+import CalculatorsMenu from './CalculatorsMenu';
+import ProfileSettings from './ProfileSettings';
 
-import { generatePostImage, generatePostText, generateSEOArticle, generateInfographicContent, generateConversionContent, updateUserProfile } from './services/geminiService';
-import { GeneratedResult, PostState, GeneratedArticle, ArticleState, InfographicState, InfographicResult, ConversionState, ConversionResult, PostFormat, PostCategory, Tone, PubMedArticle, UserProfile } from './types';
+import { generatePostImage, generatePostText, generateSEOArticle, generateInfographicContent, generateConversionContent, updateUserProfile } from '../services/geminiService';
+import { GeneratedResult, PostState, GeneratedArticle, ArticleState, InfographicState, InfographicResult, ConversionState, ConversionResult, PostFormat, PostCategory, Tone, PubMedArticle, UserProfile } from '../types';
 
 type ViewMode = 'dashboard' | 'post' | 'seo' | 'materials' | 'infographic' | 'conversion' | 'history' | 'site' | 'trends' | 'calculator' | 'publications' | 'anatomy' | 'card' | 'scores' | 'frax' | 'prescription' | 'news' | 'journey' | 'video' | 'clinical' | 'marketing_roi' | 'patients' | 'calculators' | 'weight' | 'visco' | 'settings';
 
@@ -106,6 +102,10 @@ function App() {
   // EFFECTS
   useEffect(() => {
     localStorage.setItem('medisocial_last_view', viewMode);
+    // Clear wizard state if not in post creation mode to ensure fresh starts
+    if (viewMode !== 'post') {
+        setWizardInitialState(null);
+    }
   }, [viewMode]);
 
   useEffect(() => {
@@ -203,11 +203,26 @@ function App() {
 
   // New Quick Start Handler
   const handleQuickStart = (topic: string) => {
+      // Heuristic to detect format
+      let format = PostFormat.FEED;
+      const lowerTopic = topic.toLowerCase();
+      if (lowerTopic.includes('story') || lowerTopic.includes('stories') || lowerTopic.includes('reels') || lowerTopic.includes('video')) {
+          format = PostFormat.STORY;
+      }
+
+      // Heuristic to detect category
+      let category = PostCategory.PATHOLOGY;
+      if (lowerTopic.includes('cirurgia') || lowerTopic.includes('operar') || lowerTopic.includes('protese')) {
+          category = PostCategory.SURGERY;
+      } else if (lowerTopic.includes('esporte') || lowerTopic.includes('corrida') || lowerTopic.includes('academia')) {
+          category = PostCategory.SPORTS;
+      }
+
       const newState: PostState = {
           topic: topic,
-          category: PostCategory.PATHOLOGY, // Default
-          tone: Tone.PROFESSIONAL, // Default
-          format: PostFormat.FEED, // Default
+          category: category,
+          tone: userProfile.defaultTone || Tone.PROFESSIONAL,
+          format: format,
           customInstructions: ''
       };
       setWizardInitialState(newState);
@@ -297,7 +312,7 @@ function App() {
           </nav>
 
           <div className="p-4 border-t border-slate-200">
-              <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100" onClick={() => setViewMode('settings')}>
+              <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100 cursor-pointer" onClick={() => setViewMode('settings')}>
                   {userProfile.photoUrl ? (
                       <img src={userProfile.photoUrl} className="w-8 h-8 rounded-full object-cover bg-slate-200" alt="User" />
                   ) : (
@@ -334,7 +349,7 @@ function App() {
           )}
 
           {/* Main Scrollable Area */}
-          <main className="flex-1 overflow-hidden relative flex flex-col w-full">
+          <main className="flex-1 overflow-hidden relative flex flex-col w-full transition-all duration-300">
               
               {/* DASHBOARD VIEW */}
               {viewMode === 'dashboard' && (
