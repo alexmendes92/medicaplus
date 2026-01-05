@@ -37,9 +37,9 @@ const CalculatorsMenu: React.FC<CalculatorsMenuProps> = ({ onSelectTool }) => {
             bg: 'bg-purple-50'
         },
         {
-            id: 'clinical', // Maps to Clinical Suite (BioAge, etc)
-            title: 'Bio-Age & Clínica',
-            desc: 'Idade biológica e análise de feridas.',
+            id: 'clinical', // Maps to Clinical Suite
+            title: 'SARC-F / Fragilidade',
+            desc: 'Rastreio de sarcopenia em idosos.',
             icon: Activity,
             color: 'text-orange-600',
             bg: 'bg-orange-50'

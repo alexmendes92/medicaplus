@@ -4,12 +4,13 @@ import html2canvas from 'html2canvas';
 import { 
     Activity, Eye, Camera, Syringe, Weight, Pill, Utensils, 
     ChevronRight, AlertTriangle, CheckCircle2, UploadCloud, 
-    Loader2, Scale, Calendar, Info, FlaskConical, PersonStanding, X, ArrowRight, ArrowLeft, Share2, Flame
+    Loader2, Scale, Calendar, Info, FlaskConical, PersonStanding, X, ArrowRight, ArrowLeft, Share2, Flame,
+    Muscle, Dumbbell, BookOpen
 } from 'lucide-react';
 import { analyzeWoundImage, checkDrugInteractions, generateSupplementPlan } from '../services/geminiService';
 import { WoundAnalysisResult, DrugInteractionResult, SupplementPlan, UserProfile } from '../types';
 
-type Tool = 'bioage' | 'wound' | 'valgus' | 'visco' | 'weight' | 'meds' | 'supplements';
+type Tool = 'sarcf' | 'wound' | 'valgus' | 'visco' | 'weight' | 'meds' | 'supplements';
 
 interface ClinicalSuiteProps {
     userProfile?: UserProfile;
@@ -18,40 +19,36 @@ interface ClinicalSuiteProps {
 const ClinicalSuite: React.FC<ClinicalSuiteProps> = ({ userProfile }) => {
   const [activeTool, setActiveTool] = useState<Tool | null>(null);
   const [step, setStep] = useState(1);
-  const bioAgeRef = useRef<HTMLDivElement>(null);
+  const captureRef = useRef<HTMLDivElement>(null);
 
-  // --- BIO AGE STATE ---
-  const [chronAge, setChronAge] = useState('');
-  const [gripStrength, setGripStrength] = useState(30);
-  const [activityLevel, setActivityLevel] = useState('moderado');
-  const [painScore, setPainScore] = useState(2);
-  const [bioResult, setBioResult] = useState<number | null>(null);
-  const [displayBioAge, setDisplayBioAge] = useState(0);
+  // --- SARC-F STATE (Validado Cientificamente) ---
+  const [sarcAnswers, setSarcAnswers] = useState({
+      strength: 0,
+      walking: 0,
+      rising: 0,
+      stairs: 0,
+      falls: 0
+  });
+  const [sarcResult, setSarcResult] = useState<number | null>(null);
 
-  const calculateBioAge = () => {
-      let age = parseInt(chronAge) || 40;
-      let factor = 0;
-      if (gripStrength > 45) factor -= 4;
-      else if (gripStrength < 25) factor += 4;
-      if (activityLevel === 'atleta') factor -= 3;
-      if (activityLevel === 'sedentario') factor += 4;
-      factor += Math.floor(painScore / 2);
-      setBioResult(age + factor);
-      setStep(4);
+  const calculateSarcF = () => {
+      const total = Object.values(sarcAnswers).reduce((a: number, b: number) => a + b, 0);
+      setSarcResult(total);
+      setStep(6); // Result screen
   };
 
-  const handleShareBioAge = async () => {
-      if (bioAgeRef.current) {
+  const handleShareResult = async () => {
+      if (captureRef.current) {
           try {
-              const canvas = await html2canvas(bioAgeRef.current, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
+              const canvas = await html2canvas(captureRef.current, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
               canvas.toBlob(async (blob) => {
                   if (blob) {
-                      const file = new File([blob], 'bio_age.png', { type: 'image/png' });
+                      const file = new File([blob], 'resultado_clinico.png', { type: 'image/png' });
                       if (navigator.share) {
-                          try { await navigator.share({ files: [file], title: 'Bio-Age', text: 'Resultado Idade Biológica' }); } catch (e) { console.log(e); }
+                          try { await navigator.share({ files: [file], title: 'Resultado Clínico' }); } catch (e) { console.log(e); }
                       } else {
                           const link = document.createElement('a');
-                          link.download = 'bio_age.png';
+                          link.download = 'resultado.png';
                           link.href = canvas.toDataURL();
                           link.click();
                       }
@@ -60,27 +57,6 @@ const ClinicalSuite: React.FC<ClinicalSuiteProps> = ({ userProfile }) => {
           } catch (e) { alert("Erro ao criar imagem."); }
       }
   };
-
-  // Animate Bio Result
-  useEffect(() => {
-      if (step === 4 && bioResult !== null) {
-          const duration = 1500;
-          const startTime = performance.now();
-          const start = 0;
-          const end = bioResult;
-
-          const animate = (currentTime: number) => {
-              const elapsed = currentTime - startTime;
-              const progress = Math.min(elapsed / duration, 1);
-              const ease = 1 - Math.pow(1 - progress, 3);
-              setDisplayBioAge(Math.floor(start + (end - start) * ease));
-              if (progress < 1) requestAnimationFrame(animate);
-          };
-          requestAnimationFrame(animate);
-      } else {
-          setDisplayBioAge(0);
-      }
-  }, [step, bioResult]);
 
   // --- WOUND STATE ---
   const [woundImage, setWoundImage] = useState<string | null>(null);
@@ -114,7 +90,7 @@ const ClinicalSuite: React.FC<ClinicalSuiteProps> = ({ userProfile }) => {
   const [viscoBrand, setViscoBrand] = useState('Synvisc One');
   const [viscoSide, setViscoSide] = useState('Direito');
 
-  // --- WEIGHT SIMULATOR ---
+  // --- WEIGHT BIOMECHANICS ---
   const [currentWeight, setCurrentWeight] = useState('');
   const [targetWeight, setTargetWeight] = useState('');
   
@@ -150,7 +126,7 @@ const ClinicalSuite: React.FC<ClinicalSuiteProps> = ({ userProfile }) => {
   const closeTool = () => {
       setActiveTool(null);
       setStep(1);
-      setBioResult(null);
+      setSarcResult(null);
       setWoundImage(null);
       setWoundAnalysis(null);
       setMedResult(null);
@@ -217,97 +193,110 @@ const ClinicalSuite: React.FC<ClinicalSuiteProps> = ({ userProfile }) => {
 
   const renderToolContent = () => {
       switch(activeTool) {
-          case 'bioage':
+          case 'sarcf':
               return (
                   <ToolLayout
                     footer={
-                        step === 1 ? <NextButton onClick={() => setStep(2)} disabled={!chronAge} /> :
-                        step === 2 ? <NextButton onClick={() => setStep(3)} /> :
-                        step === 3 ? <NextButton onClick={calculateBioAge} label="Calcular Resultado" /> :
+                        step < 6 ? <NextButton onClick={() => setStep(s => s + 1)} /> :
+                        step === 5 ? <NextButton onClick={calculateSarcF} label="Calcular Risco" /> :
                         <div className="flex gap-3">
-                            <button onClick={handleShareBioAge} className="flex-1 bg-indigo-600 text-white py-4 rounded-xl font-bold text-sm shadow-lg flex items-center justify-center gap-2 active:scale-95">
-                                <Share2 className="w-4 h-4" /> Gerar Imagem
+                            <button onClick={handleShareResult} className="flex-1 bg-indigo-600 text-white py-4 rounded-xl font-bold text-sm shadow-lg flex items-center justify-center gap-2 active:scale-95">
+                                <Share2 className="w-4 h-4" /> Relatório
                             </button>
-                            <button onClick={() => { setStep(1); setChronAge(''); }} className="flex-1 text-slate-400 font-bold text-sm border border-slate-200 rounded-xl hover:bg-slate-50">
-                                Novo Cálculo
+                            <button onClick={() => { setStep(1); setSarcAnswers({ strength: 0, walking: 0, rising: 0, stairs: 0, falls: 0 }); }} className="flex-1 text-slate-400 font-bold text-sm border border-slate-200 rounded-xl hover:bg-slate-50">
+                                Novo Exame
                             </button>
                         </div>
                     }
                   >
+                      {/* SARC-F QUESTIONS */}
                       {step === 1 && (
                           <div className="animate-fadeIn">
-                              <ProgressDots total={4} current={1} />
-                              <StepHeader title="Dados Básicos" desc="Comece com a idade cronológica do paciente." />
-                              <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm text-center mb-6">
-                                  <label className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 block">Idade (Anos)</label>
-                                  <input 
-                                      type="number" 
-                                      value={chronAge} 
-                                      onChange={e => setChronAge(e.target.value)} 
-                                      className="text-6xl font-black text-center w-full bg-transparent outline-none placeholder:text-slate-200 text-slate-900" 
-                                      placeholder="00" 
-                                      autoFocus
-                                  />
+                              <ProgressDots total={5} current={1} />
+                              <StepHeader title="Força (Strength)" desc="Quanta dificuldade para levantar/carregar 5kg?" />
+                              <div className="space-y-3">
+                                  <SelectionCard selected={sarcAnswers.strength === 0} onClick={() => setSarcAnswers({...sarcAnswers, strength: 0})} icon={Dumbbell} title="Nenhuma" desc="Levanta facilmente." />
+                                  <SelectionCard selected={sarcAnswers.strength === 1} onClick={() => setSarcAnswers({...sarcAnswers, strength: 1})} icon={Dumbbell} title="Alguma" desc="Sente esforço." />
+                                  <SelectionCard selected={sarcAnswers.strength === 2} onClick={() => setSarcAnswers({...sarcAnswers, strength: 2})} icon={Dumbbell} title="Muita / Incapaz" desc="Não consegue." />
                               </div>
                           </div>
                       )}
                       {step === 2 && (
                           <div className="animate-slideUp">
-                              <ProgressDots total={4} current={2} />
-                              <StepHeader title="Nível de Atividade" desc="Como é a rotina física do paciente?" />
-                              <div className="space-y-3 mb-6">
-                                  <SelectionCard selected={activityLevel === 'sedentario'} onClick={() => setActivityLevel('sedentario')} icon={PersonStanding} title="Sedentário" desc="Pouco ou nenhum exercício." />
-                                  <SelectionCard selected={activityLevel === 'moderado'} onClick={() => setActivityLevel('moderado')} icon={PersonStanding} title="Moderado" desc="Caminhadas, atividades leves 2-3x/sem." />
-                                  <SelectionCard selected={activityLevel === 'atleta'} onClick={() => setActivityLevel('atleta')} icon={PersonStanding} title="Atleta / Intenso" desc="Treino diário ou alta performance." />
+                              <ProgressDots total={5} current={2} />
+                              <StepHeader title="Caminhada (Assistance)" desc="Dificuldade em atravessar um cômodo?" />
+                              <div className="space-y-3">
+                                  <SelectionCard selected={sarcAnswers.walking === 0} onClick={() => setSarcAnswers({...sarcAnswers, walking: 0})} icon={PersonStanding} title="Nenhuma" />
+                                  <SelectionCard selected={sarcAnswers.walking === 1} onClick={() => setSarcAnswers({...sarcAnswers, walking: 1})} icon={PersonStanding} title="Alguma" />
+                                  <SelectionCard selected={sarcAnswers.walking === 2} onClick={() => setSarcAnswers({...sarcAnswers, walking: 2})} icon={PersonStanding} title="Muita / Incapaz" desc="Usa apoio ou não consegue." />
                               </div>
                           </div>
                       )}
                       {step === 3 && (
                           <div className="animate-slideUp">
-                              <ProgressDots total={4} current={3} />
-                              <StepHeader title="Métricas Clínicas" desc="Avaliação funcional rápida." />
-                              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-6 mb-6">
-                                  <div>
-                                      <div className="flex justify-between mb-2">
-                                          <label className="text-xs font-bold text-slate-500 uppercase">Força de Preensão (Handgrip)</label>
-                                          <span className="text-xs font-bold bg-slate-100 px-2 py-1 rounded">{gripStrength} kgf</span>
-                                      </div>
-                                      <input type="range" min="10" max="80" value={gripStrength} onChange={e => setGripStrength(Number(e.target.value))} className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-green-500" />
-                                  </div>
-                                  <div>
-                                      <div className="flex justify-between mb-2">
-                                          <label className="text-xs font-bold text-slate-500 uppercase">Nível de Dor (EVA)</label>
-                                          <span className={`text-xs font-bold px-2 py-1 rounded ${painScore > 5 ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}>{painScore}/10</span>
-                                      </div>
-                                      <input type="range" min="0" max="10" value={painScore} onChange={e => setPainScore(Number(e.target.value))} className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-red-500" />
-                                  </div>
+                              <ProgressDots total={5} current={3} />
+                              <StepHeader title="Levantar (Rising)" desc="Dificuldade para sair da cama/cadeira?" />
+                              <div className="space-y-3">
+                                  <SelectionCard selected={sarcAnswers.rising === 0} onClick={() => setSarcAnswers({...sarcAnswers, rising: 0})} icon={Activity} title="Nenhuma" />
+                                  <SelectionCard selected={sarcAnswers.rising === 1} onClick={() => setSarcAnswers({...sarcAnswers, rising: 1})} icon={Activity} title="Alguma" />
+                                  <SelectionCard selected={sarcAnswers.rising === 2} onClick={() => setSarcAnswers({...sarcAnswers, rising: 2})} icon={Activity} title="Muita / Incapaz" />
                               </div>
                           </div>
                       )}
-                      {step === 4 && bioResult && (
-                          <div className="animate-scaleIn pt-8">
+                      {step === 4 && (
+                          <div className="animate-slideUp">
+                              <ProgressDots total={5} current={4} />
+                              <StepHeader title="Escadas (Climb)" desc="Dificuldade em subir 10 degraus?" />
+                              <div className="space-y-3">
+                                  <SelectionCard selected={sarcAnswers.stairs === 0} onClick={() => setSarcAnswers({...sarcAnswers, stairs: 0})} icon={Activity} title="Nenhuma" />
+                                  <SelectionCard selected={sarcAnswers.stairs === 1} onClick={() => setSarcAnswers({...sarcAnswers, stairs: 1})} icon={Activity} title="Alguma" />
+                                  <SelectionCard selected={sarcAnswers.stairs === 2} onClick={() => setSarcAnswers({...sarcAnswers, stairs: 2})} icon={Activity} title="Muita / Incapaz" />
+                              </div>
+                          </div>
+                      )}
+                      {step === 5 && (
+                          <div className="animate-slideUp">
+                              <ProgressDots total={5} current={5} />
+                              <StepHeader title="Quedas (Falls)" desc="Quantas quedas no último ano?" />
+                              <div className="space-y-3">
+                                  <SelectionCard selected={sarcAnswers.falls === 0} onClick={() => { setSarcAnswers({...sarcAnswers, falls: 0}); calculateSarcF(); }} icon={AlertTriangle} title="Nenhuma" />
+                                  <SelectionCard selected={sarcAnswers.falls === 1} onClick={() => { setSarcAnswers({...sarcAnswers, falls: 1}); calculateSarcF(); }} icon={AlertTriangle} title="1 a 3 quedas" />
+                                  <SelectionCard selected={sarcAnswers.falls === 2} onClick={() => { setSarcAnswers({...sarcAnswers, falls: 2}); calculateSarcF(); }} icon={AlertTriangle} title="4 ou mais quedas" />
+                              </div>
+                          </div>
+                      )}
+                      
+                      {step === 6 && sarcResult !== null && (
+                          <div className="animate-scaleIn pt-4">
                               {/* Capture Ref */}
-                              <div ref={bioAgeRef} className="text-center bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm relative mb-6">
+                              <div ref={captureRef} className="text-center bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm relative mb-6">
                                   {/* Branding */}
                                   <div className="flex items-center justify-center gap-2 mb-6 border-b border-slate-50 pb-2">
                                       <Flame className="w-3 h-3 text-slate-900" />
-                                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-900">{userProfile?.name || 'MediSocial AI'}</span>
+                                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-900">{userProfile?.name || 'MediSocial Clinical'}</span>
                                   </div>
 
-                                  <div className="w-56 h-56 mx-auto bg-slate-50 rounded-full border-8 border-white shadow-xl flex flex-col items-center justify-center mb-8 relative">
-                                      <div className="absolute inset-0 border-8 border-green-500 rounded-full opacity-20"></div>
-                                      <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Idade Bio</span>
-                                      <span className="text-7xl font-black text-slate-900 tracking-tighter leading-none">{displayBioAge}</span>
-                                      <span className="text-sm font-bold text-slate-500 mt-1">Anos</span>
+                                  <div className="flex items-center justify-center gap-2 mb-2">
+                                      <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Score SARC-F</span>
                                   </div>
-                                  <h3 className="text-2xl font-black text-slate-900 mb-2">
-                                      {bioResult < parseInt(chronAge) ? "Excelente! 👏" : "Atenção Necessária ⚠️"}
+                                  
+                                  <div className={`w-40 h-40 mx-auto rounded-full border-8 shadow-xl flex flex-col items-center justify-center mb-6 relative ${sarcResult >= 4 ? 'border-red-100 bg-red-50 text-red-700' : 'border-green-100 bg-green-50 text-green-700'}`}>
+                                      <span className="text-6xl font-black tracking-tighter leading-none">{sarcResult}</span>
+                                      <span className="text-xs font-bold mt-1 opacity-70">/ 10</span>
+                                  </div>
+
+                                  <h3 className={`text-2xl font-black mb-2 ${sarcResult >= 4 ? 'text-red-700' : 'text-green-700'}`}>
+                                      {sarcResult >= 4 ? "Sarcopenia Provável" : "Baixo Risco"}
                                   </h3>
-                                  <p className="text-slate-500 text-sm max-w-xs mx-auto mb-4 font-medium leading-relaxed">
-                                      {bioResult < parseInt(chronAge) 
-                                          ? `O joelho do paciente é biologicamente ${parseInt(chronAge) - bioResult} anos mais jovem que a idade cronológica.` 
-                                          : `O joelho apresenta desgaste compatível com uma pessoa de ${bioResult} anos.`}
-                                  </p>
+                                  
+                                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 text-left">
+                                      <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                                          {sarcResult >= 4 
+                                              ? "Score ≥ 4 é preditivo de sarcopenia, risco aumentado de quedas, hospitalização e complicações pós-operatórias. Recomenda-se avaliação de massa muscular." 
+                                              : "Função muscular preservada. Manter atividade física e aporte proteico adequado."}
+                                      </p>
+                                      <p className="text-[9px] text-slate-400 mt-2 font-mono">Fonte: Malmstrom TK, et al. J Am Med Dir Assoc. 2013;14(8):530-5.</p>
+                                  </div>
                               </div>
                           </div>
                       )}
@@ -366,18 +355,18 @@ const ClinicalSuite: React.FC<ClinicalSuiteProps> = ({ userProfile }) => {
                       {step === 1 && (
                           <div className="animate-fadeIn">
                               <ProgressDots total={2} current={1} />
-                              <StepHeader title="Peso Atual" desc="Informe o peso atual do paciente." />
+                              <StepHeader title="Biomecânica" desc="Informe o peso atual para análise de carga." />
                               <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm text-center mb-6 relative overflow-hidden">
                                   <div className="absolute -right-6 -top-6 w-24 h-24 bg-orange-50 rounded-full"></div>
                                   <input type="number" value={currentWeight} onChange={e => setCurrentWeight(e.target.value)} placeholder="00.0" className="text-6xl font-black text-center w-full bg-transparent outline-none placeholder:text-slate-200 text-slate-900 relative z-10" autoFocus />
-                                  <span className="text-sm font-bold text-slate-400 mt-2 block uppercase tracking-widest">Quilogramas (Kg)</span>
+                                  <span className="text-sm font-bold text-slate-400 mt-2 block uppercase tracking-widest">Peso Corporal (Kg)</span>
                               </div>
                           </div>
                       )}
                       {step === 2 && (
                           <div className="animate-slideUp">
                               <ProgressDots total={2} current={2} />
-                              <StepHeader title="Meta de Peso" desc="Qual o objetivo para redução de carga?" />
+                              <StepHeader title="Meta Terapêutica" desc="Qual o objetivo para redução de carga?" />
                               <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm text-center mb-6">
                                   <input type="number" value={targetWeight} onChange={e => setTargetWeight(e.target.value)} placeholder="00.0" className="text-6xl font-black text-center w-full bg-transparent outline-none placeholder:text-slate-200 text-green-600" autoFocus />
                                   <span className="text-sm font-bold text-slate-400 mt-2 block uppercase tracking-widest">Meta (Kg)</span>
@@ -385,11 +374,13 @@ const ClinicalSuite: React.FC<ClinicalSuiteProps> = ({ userProfile }) => {
                               {targetWeight && (
                                   <div className="bg-orange-50 p-6 rounded-[2rem] border border-orange-100 text-center mb-6 animate-scaleIn">
                                       <Scale className="w-8 h-8 text-orange-500 mx-auto mb-3" />
-                                      <p className="text-xs font-bold text-orange-800 uppercase tracking-widest mb-1">Carga Articular Reduzida/Dia</p>
+                                      <p className="text-xs font-bold text-orange-800 uppercase tracking-widest mb-1">Alívio de Força de Reação Articular</p>
                                       <p className="text-4xl font-black text-orange-600 tracking-tighter">
                                           {((parseFloat(currentWeight) - parseFloat(targetWeight)) * 4 * 5000 / 1000).toFixed(1)} Ton
                                       </p>
-                                      <p className="text-[10px] text-orange-700/70 mt-2 font-medium px-4">Baseado em 5.000 passos/dia. Cada 1kg perdido retira 4kg de pressão por passo no joelho.</p>
+                                      <p className="text-[10px] text-orange-700/70 mt-2 font-medium px-4 leading-relaxed">
+                                          Estimativa baseada na <strong>Lei de Wolff</strong> e estudos de marcha: Cada 1kg perdido reduz ~4kg de carga compressiva no joelho por passo.
+                                      </p>
                                   </div>
                               )}
                           </div>
@@ -400,15 +391,15 @@ const ClinicalSuite: React.FC<ClinicalSuiteProps> = ({ userProfile }) => {
               return (
                   <ToolLayout
                     footer={
-                        step === 1 ? <NextButton onClick={checkMeds} disabled={medLoading || !medsList} label={medLoading ? "Analisando..." : "Verificar Segurança"} /> :
+                        step === 1 ? <NextButton onClick={checkMeds} disabled={medLoading || !medsList} label={medLoading ? "Consultando Base..." : "Verificar Interações"} /> :
                         <button onClick={() => setStep(1)} className="w-full py-4 text-slate-400 font-bold text-sm hover:text-slate-600">Nova Verificação</button>
                     }
                   >
                       {step === 1 && (
                           <div className="animate-fadeIn">
-                              <StepHeader title="Lista de Medicamentos" desc="Digite os remédios para verificar interações." />
+                              <StepHeader title="Farmacologia" desc="Cole a lista de medicamentos para análise de segurança." />
                               <div className="bg-white p-4 rounded-[2rem] border border-slate-200 shadow-sm mb-6">
-                                  <textarea value={medsList} onChange={e => setMedsList(e.target.value)} placeholder="Ex: AAS, Losartana, Omeprazol, Ibuprofeno..." className="w-full h-40 p-4 bg-slate-50 rounded-xl outline-none text-lg font-medium placeholder:text-slate-300 resize-none focus:bg-white focus:ring-2 focus:ring-slate-100 transition-all" />
+                                  <textarea value={medsList} onChange={e => setMedsList(e.target.value)} placeholder="Ex: AAS 100mg, Losartana 50mg, Omeprazol 20mg, Ibuprofeno..." className="w-full h-40 p-4 bg-slate-50 rounded-xl outline-none text-lg font-medium placeholder:text-slate-300 resize-none focus:bg-white focus:ring-2 focus:ring-slate-100 transition-all" />
                               </div>
                           </div>
                       )}
@@ -420,7 +411,7 @@ const ClinicalSuite: React.FC<ClinicalSuiteProps> = ({ userProfile }) => {
                                   <p className={`text-sm font-medium opacity-80 leading-relaxed`}>{medResult.details}</p>
                               </div>
                               <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm mb-6">
-                                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Recomendação Clínica</h4>
+                                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Conduta Clínica Sugerida</h4>
                                   <p className="text-sm font-bold text-slate-700 leading-relaxed">{medResult.recommendation}</p>
                               </div>
                           </div>
@@ -437,7 +428,7 @@ const ClinicalSuite: React.FC<ClinicalSuiteProps> = ({ userProfile }) => {
                   >
                       {step === 1 && (
                           <div className="animate-fadeIn">
-                              <StepHeader title="Objetivo do Protocolo" desc="Qual o foco da suplementação?" />
+                              <StepHeader title="Suporte Nutricional" desc="Qual o foco clínico da suplementação?" />
                               <div className="space-y-3 mb-8">
                                   {['Cartilagem (Artrose)', 'Músculo (Sarcopenia)', 'Tendão (Tendinite)', 'Pós-Op LCA'].map(type => (
                                       <SelectionCard key={type} selected={injuryType === type} onClick={() => setInjuryType(type)} icon={Utensils} title={type} />
@@ -447,7 +438,7 @@ const ClinicalSuite: React.FC<ClinicalSuiteProps> = ({ userProfile }) => {
                       )}
                       {step === 2 && suppPlan && (
                           <div className="animate-slideUp">
-                              <StepHeader title="Protocolo Sugerido" desc={suppPlan.injuryType} />
+                              <StepHeader title="Protocolo Baseado em Evidência" desc={suppPlan.injuryType} />
                               <div className="space-y-4 mb-8">
                                   {suppPlan.supplements.map((supp, idx) => (
                                       <div key={idx} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-2">
@@ -477,12 +468,12 @@ const ClinicalSuite: React.FC<ClinicalSuiteProps> = ({ userProfile }) => {
                   >
                       {step === 1 && (
                           <div className="animate-fadeIn text-center flex flex-col h-full justify-center">
-                              <StepHeader title="Captura da Imagem" desc="Tire uma foto clara da lesão ou cicatriz." />
+                              <StepHeader title="Análise de Ferida" desc="Visão computacional para sinais flogísticos." />
                               <div onClick={() => woundInputRef.current?.click()} className="w-full aspect-square bg-slate-100 rounded-[2.5rem] border-4 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 hover:border-slate-300 transition-all group mb-6">
                                   <div className="w-20 h-20 bg-white rounded-full shadow-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                                       <Camera className="w-8 h-8 text-slate-400" />
                                   </div>
-                                  <span className="font-bold text-slate-400">Toque para Upload</span>
+                                  <span className="font-bold text-slate-400">Capturar Imagem</span>
                                   <input type="file" ref={woundInputRef} className="hidden" accept="image/*" onChange={handleWoundUpload} />
                               </div>
                           </div>
@@ -572,10 +563,10 @@ const ClinicalSuite: React.FC<ClinicalSuiteProps> = ({ userProfile }) => {
                         <h1 className="text-2xl font-black text-slate-900 tracking-tight">Ferramentas de Consultório</h1>
                         <p className="text-sm text-slate-500 font-medium">Utilitários para avaliação rápida e suporte à decisão.</p>
                     </div>
-                    <ToolCard id="bioage" icon={Activity} title="Bio-Age" desc="Idade biológica vs. Cronológica." color="text-green-600 bg-green-600" />
+                    <ToolCard id="sarcf" icon={Activity} title="SARC-F" desc="Rastreio de sarcopenia e risco de quedas." color="text-green-600 bg-green-600" />
                     <ToolCard id="wound" icon={Eye} title="Wound AI" desc="Análise de feridas por visão computacional." color="text-red-500 bg-red-500" />
                     <ToolCard id="visco" icon={Syringe} title="Ciclo Visco" desc="Gestão de datas do Ácido Hialurônico." color="text-blue-500 bg-blue-500" />
-                    <ToolCard id="weight" icon={Weight} title="Carga Articular" desc="Simulador de impacto do peso." color="text-orange-500 bg-orange-500" />
+                    <ToolCard id="weight" icon={Weight} title="Carga Articular" desc="Biomecânica do impacto do peso." color="text-orange-500 bg-orange-500" />
                     <ToolCard id="meds" icon={Pill} title="Interações" desc="Verificador de segurança medicamentosa." color="text-teal-600 bg-teal-600" />
                     <ToolCard id="supplements" icon={Utensils} title="Suplementos" desc="Planner de protocolos nutricionais." color="text-pink-600 bg-pink-600" />
                 </div>

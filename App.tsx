@@ -222,7 +222,7 @@ function App() {
       case 'clinical': return { title: 'Clínica', subtitle: 'Ferramentas de Consultório' };
       case 'calculators': return { title: 'Calculadoras', subtitle: 'Scores e Métricas' };
       case 'publications': return { title: 'Artigos', subtitle: 'Minhas Publicações' };
-      case 'patients': return { title: 'Pacientes', subtitle: 'Gestão de Pacientes' };
+      case 'patients': return { title: 'Consultório Visual', subtitle: 'Apresentação Clínica (LGPD)' };
       case 'settings': return { title: 'Configurações', subtitle: 'Perfil do Médico' };
       default: return { title: 'MediSocial', subtitle: userProfile?.name || 'Doutor(a)' };
     }
@@ -237,11 +237,11 @@ function App() {
   // --- MENU CONFIGURATION ---
   const menuItems = [
     { id: 'dashboard', label: 'Home', icon: LayoutGrid },
-    { id: 'patients', label: 'Pacientes', icon: Users },
+    { id: 'patients', label: 'Consultório', icon: Activity },
     { id: 'post', label: 'Criar', icon: PlusSquare },
     { id: 'video', label: 'Vídeo', icon: Video },
     { id: 'seo', label: 'Blog', icon: BookOpen },
-    { id: 'clinical', label: 'Clínica', icon: Activity },
+    { id: 'clinical', label: 'Ferramentas', icon: Calculator },
     { id: 'journey', label: 'Jornada', icon: Route },
     { id: 'marketing_roi', label: 'ROI', icon: PieChart },
     { id: 'card', label: 'Card', icon: QrCode },
@@ -447,7 +447,7 @@ function App() {
           </main>
 
           {/* FLOATING GLASS DOCK (Mobile Only) */}
-          <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-2xl border border-white/50 shadow-[0_20px_40px_-12px_rgba(0,0,0,0.15)] rounded-[2.5rem] flex items-center p-2 z-50 gap-2 max-w-[95%] w-full justify-between transition-all duration-300 lg:hidden px-6">
+          <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-2xl border border-white/50 shadow-[0_20px_40px_-12px_rgba(0,0,0,0.15)] rounded-[2.5rem] flex items-center p-2 z-[40] gap-2 max-w-[95%] w-full justify-between transition-all duration-300 lg:hidden px-6">
               
               <button 
                 onClick={() => setViewMode('dashboard')} 
@@ -461,8 +461,8 @@ function App() {
                 onClick={() => setViewMode('patients')} 
                 className={`flex-1 h-14 rounded-[2rem] flex flex-col items-center justify-center transition-all duration-300 relative group overflow-hidden ${viewMode === 'patients' ? 'bg-green-600 text-white shadow-lg shadow-green-500/30' : 'text-slate-400 hover:bg-slate-100 hover:text-slate-600'}`}
               >
-                  <Users className={`w-5 h-5 mb-0.5 ${viewMode === 'patients' ? 'animate-bounceClick' : ''}`} />
-                  {viewMode === 'patients' && <span className="text-[8px] font-bold absolute bottom-2 opacity-80 animate-fadeIn">Pacientes</span>}
+                  <Activity className={`w-5 h-5 mb-0.5 ${viewMode === 'patients' ? 'animate-bounceClick' : ''}`} />
+                  {viewMode === 'patients' && <span className="text-[8px] font-bold absolute bottom-2 opacity-80 animate-fadeIn">Consultório</span>}
               </button>
               
               <button 
