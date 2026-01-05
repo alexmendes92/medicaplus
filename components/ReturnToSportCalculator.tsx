@@ -11,15 +11,21 @@ interface ReturnToSportCalculatorProps {
     userProfile?: UserProfile;
 }
 
+// Extending type locally since we are modifying this file only
+interface ExtendedRTSMetrics extends RTSMetrics {
+    isokineticDeficit?: number;
+}
+
 const ReturnToSportCalculator: React.FC<ReturnToSportCalculatorProps> = ({ userProfile }) => {
-  const [metrics, setMetrics] = useState<RTSMetrics>({
+  const [metrics, setMetrics] = useState<ExtendedRTSMetrics>({
     patientName: '',
     limbSymmetry: 85,
     painScore: 2,
     romExtension: 0,
     romFlexion: 135,
     hopTest: 80,
-    psychologicalReadiness: 70
+    psychologicalReadiness: 70,
+    isokineticDeficit: 15 // Default warning level
   });
 
   const [score, setScore] = useState(0);
@@ -39,11 +45,15 @@ const ReturnToSportCalculator: React.FC<ReturnToSportCalculatorProps> = ({ userP
       const painFactor = Math.max(0, 10 - metrics.painScore) * 10; // 0-100 (100 is no pain)
       const romFactor = (metrics.romFlexion >= 130 && metrics.romExtension <= 5) ? 100 : (metrics.romFlexion / 140) * 100;
       
+      // Isokinetic factor (invert: 0 deficit = 100 score)
+      const isoFactor = Math.max(0, 100 - (metrics.isokineticDeficit || 0));
+
       const rawScore = (
-        (metrics.limbSymmetry * 0.3) +
-        (metrics.hopTest * 0.3) +
-        (metrics.psychologicalReadiness * 0.2) +
-        (painFactor * 0.1) +
+        (metrics.limbSymmetry * 0.25) +
+        (isoFactor * 0.25) + // Weighting strength heavily
+        (metrics.hopTest * 0.2) +
+        (metrics.psychologicalReadiness * 0.15) +
+        (painFactor * 0.05) +
         (romFactor * 0.1)
       );
 
@@ -53,7 +63,8 @@ const ReturnToSportCalculator: React.FC<ReturnToSportCalculatorProps> = ({ userP
           romNorm: Math.min(100, romFactor),
           lsi: metrics.limbSymmetry,
           hop: metrics.hopTest,
-          psy: metrics.psychologicalReadiness
+          psy: metrics.psychologicalReadiness,
+          iso: isoFactor
       };
   }, [metrics]);
 
@@ -101,7 +112,22 @@ const ReturnToSportCalculator: React.FC<ReturnToSportCalculatorProps> = ({ userP
       }
   };
 
+  // HARD LOCK LOGIC
   const getStatus = (s: number) => {
+      // Safety Checks (Trava de Segurança)
+      const isUnsafeLSI = metrics.limbSymmetry < 90;
+      const isUnsafeIso = (metrics.isokineticDeficit || 0) > 10;
+
+      if (isUnsafeLSI || isUnsafeIso) {
+          return { 
+              label: 'INAPTO (CRITÉRIO)', 
+              color: 'text-rose-600', 
+              stroke: '#e11d48', 
+              bg: 'bg-rose-500', 
+              msg: 'Atenção: Critérios objetivos de força não atingidos. Retorno não recomendado independentemente do score final.' 
+          };
+      }
+
       if (s >= 90) return { label: 'APTO', color: 'text-emerald-500', stroke: '#10b981', bg: 'bg-emerald-500', msg: 'Critérios de retorno atingidos.' };
       if (s >= 75) return { label: 'TREINO', color: 'text-amber-500', stroke: '#f59e0b', bg: 'bg-amber-500', msg: 'Retorno gradual permitido.' };
       return { label: 'INAPTO', color: 'text-rose-500', stroke: '#f43f5e', bg: 'bg-rose-500', msg: 'Manter reabilitação intensiva.' };
@@ -110,14 +136,14 @@ const ReturnToSportCalculator: React.FC<ReturnToSportCalculatorProps> = ({ userP
   const status = getStatus(score);
 
   // --- SVG RADAR CHART COMPONENT ---
-  const RadarChart = ({ values }: { values: { lsi: number, hop: number, psy: number, pain: number, rom: number } }) => {
+  const RadarChart = ({ values }: { values: { lsi: number, hop: number, psy: number, pain: number, rom: number, iso: number } }) => {
       const size = 160;
       const center = size / 2;
       const radius = 60;
-      const axes = ['Força (LSI)', 'Salto (Hop)', 'Psico (ACL-RSI)', 'Dor (Inversa)', 'Mobilidade'];
-      const dataValues = [values.lsi, values.hop, values.psy, values.pain, values.rom];
+      const axes = ['LSI', 'Salto', 'Psico', 'Dor', 'ADM', 'Isoc.']; // Added Isoc
+      const dataValues = [values.lsi, values.hop, values.psy, values.pain, values.rom, values.iso];
       
-      const angleSlice = (Math.PI * 2) / 5;
+      const angleSlice = (Math.PI * 2) / 6; // Divided by 6 now
 
       const getPoint = (val: number, i: number) => {
           const r = (val / 100) * radius;
@@ -149,11 +175,11 @@ const ReturnToSportCalculator: React.FC<ReturnToSportCalculatorProps> = ({ userP
                       return <line key={i} x1={center} y1={center} x2={end[0]} y2={end[1]} stroke="#e2e8f0" strokeWidth="1" />;
                   })}
 
-                  <polygon points={pointsString} fill="rgba(16, 185, 129, 0.2)" stroke="#10b981" strokeWidth="2" />
+                  <polygon points={pointsString} fill="rgba(16, 185, 129, 0.2)" stroke={status.stroke} strokeWidth="2" />
                   
                   {dataValues.map((v, i) => {
                       const [x, y] = getPoint(v, i).split(',');
-                      return <circle key={i} cx={x} cy={y} r="3" fill="#10b981" />;
+                      return <circle key={i} cx={x} cy={y} r="3" fill={status.stroke} />;
                   })}
 
                   {axes.map((label, i) => {
@@ -173,35 +199,42 @@ const ReturnToSportCalculator: React.FC<ReturnToSportCalculatorProps> = ({ userP
       );
   };
 
-  const CustomSlider = ({ label, value, min, max, onChange, unit = '', color = 'bg-slate-900', criticalValue }: any) => (
-    <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:border-slate-200 transition-all relative overflow-hidden">
-        {criticalValue && value < criticalValue && (
-            <div className="absolute right-0 top-0 bg-red-100 text-red-600 text-[9px] font-bold px-2 py-0.5 rounded-bl-lg flex items-center gap-1">
-                <AlertTriangle className="w-3 h-3" /> Abaixo da Meta
+  const CustomSlider = ({ label, value, min, max, onChange, unit = '', color = 'bg-slate-900', criticalValue, inverse = false }: any) => {
+    // If inverse (like deficit), lower is better. Critical value means "above this is bad"
+    const isCritical = inverse 
+        ? (criticalValue && value > criticalValue)
+        : (criticalValue && value < criticalValue);
+
+    return (
+        <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:border-slate-200 transition-all relative overflow-hidden">
+            {isCritical && (
+                <div className="absolute right-0 top-0 bg-red-100 text-red-600 text-[9px] font-bold px-2 py-0.5 rounded-bl-lg flex items-center gap-1">
+                    <AlertTriangle className="w-3 h-3" /> Risco
+                </div>
+            )}
+            <div className="flex justify-between items-end mb-3">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</label>
+                <span className={`text-sm font-black ${isCritical ? 'text-red-600' : color.replace('bg-', 'text-')}`}>
+                    {value}{unit}
+                </span>
             </div>
-        )}
-        <div className="flex justify-between items-end mb-3">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</label>
-            <span className={`text-sm font-black ${color.replace('bg-', 'text-')}`}>
-                {value}{unit}
-            </span>
+            <div className="relative h-2 w-full bg-slate-100 rounded-full">
+                <div 
+                    className={`absolute top-0 left-0 h-full rounded-full ${isCritical ? 'bg-red-500' : color}`} 
+                    style={{ width: `${((value - min) / (max - min)) * 100}%` }}
+                ></div>
+                <input 
+                    type="range" min={min} max={max} value={value} onChange={(e) => onChange(Number(e.target.value))}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+                <div 
+                    className="absolute w-4 h-4 bg-white border-2 border-slate-200 rounded-full shadow-md top-1/2 -translate-y-1/2 pointer-events-none transition-all"
+                    style={{ left: `calc(${((value - min) / (max - min)) * 100}% - 8px)` }}
+                ></div>
+            </div>
         </div>
-        <div className="relative h-2 w-full bg-slate-100 rounded-full">
-            <div 
-                className={`absolute top-0 left-0 h-full rounded-full ${color}`} 
-                style={{ width: `${((value - min) / (max - min)) * 100}%` }}
-            ></div>
-            <input 
-                type="range" min={min} max={max} value={value} onChange={(e) => onChange(Number(e.target.value))}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-            />
-            <div 
-                className="absolute w-4 h-4 bg-white border-2 border-slate-200 rounded-full shadow-md top-1/2 -translate-y-1/2 pointer-events-none transition-all"
-                style={{ left: `calc(${((value - min) / (max - min)) * 100}% - 8px)` }}
-            ></div>
-        </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="h-full flex flex-col animate-fadeIn pb-24 lg:pb-0 font-sans bg-slate-50">
@@ -212,7 +245,7 @@ const ReturnToSportCalculator: React.FC<ReturnToSportCalculatorProps> = ({ userP
             <div className="flex justify-between items-center px-1">
                 <div className="flex items-center gap-2">
                     <Activity className="w-4 h-4 text-slate-400" />
-                    <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Protocolo ACL-RSI</span>
+                    <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Protocolo ACL-RSI + Isocinético</span>
                 </div>
                 <button 
                     onClick={() => setShowHistory(!showHistory)}
@@ -323,14 +356,15 @@ const ReturnToSportCalculator: React.FC<ReturnToSportCalculatorProps> = ({ userP
                                     hop: calculatedValues.hop, 
                                     psy: calculatedValues.psy, 
                                     pain: calculatedValues.painNorm, 
-                                    rom: calculatedValues.romNorm 
+                                    rom: calculatedValues.romNorm,
+                                    iso: calculatedValues.iso
                                 }} />
                             </div>
                         </div>
 
                         <div className="mt-6 pt-4 border-t border-slate-100 text-center">
                             <p className="text-xs font-medium text-slate-500">
-                                {status.msg} <span className="font-bold text-slate-800">Foque nos pontos mais próximos do centro.</span>
+                                {status.msg}
                             </p>
                         </div>
                     </div>
@@ -356,9 +390,9 @@ const ReturnToSportCalculator: React.FC<ReturnToSportCalculatorProps> = ({ userP
                     <div className="bg-amber-50 p-4 rounded-2xl border border-amber-100 flex items-start gap-3">
                         <Info className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
                         <div>
-                            <h4 className="text-xs font-bold text-amber-800 uppercase mb-1">Aviso de Segurança</h4>
+                            <h4 className="text-xs font-bold text-amber-800 uppercase mb-1">Aviso de Segurança (Hard Lock)</h4>
                             <p className="text-xs text-amber-700/80 leading-relaxed">
-                                Esta calculadora é uma ferramenta de apoio. Um LSI ou Hop Test {"<"} 90% indica risco elevado de re-lesão. A decisão final de retorno deve considerar exame clínico e funcional completo.
+                                Esta calculadora possui travas de segurança. Se o <strong>LSI for menor que 90%</strong> ou o <strong>Déficit Isocinético for maior que 10%</strong>, o paciente será considerado <strong>INAPTO</strong> automaticamente, independente dos outros scores.
                             </p>
                         </div>
                     </div>
@@ -367,6 +401,18 @@ const ReturnToSportCalculator: React.FC<ReturnToSportCalculatorProps> = ({ userP
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <CustomSlider label="Simetria (LSI)" value={metrics.limbSymmetry} min={0} max={100} unit="%" onChange={(v: number) => setMetrics({...metrics, limbSymmetry: v})} color="bg-indigo-500" criticalValue={90} />
                         <CustomSlider label="Hop Test" value={metrics.hopTest} min={0} max={100} unit="%" onChange={(v: number) => setMetrics({...metrics, hopTest: v})} color="bg-violet-500" criticalValue={90} />
+                        
+                        {/* New Isokinetic Input */}
+                        <CustomSlider 
+                            label="Déficit Isocinético (Q/I)" 
+                            value={metrics.isokineticDeficit || 0} 
+                            min={0} max={50} unit="%" 
+                            onChange={(v: number) => setMetrics({...metrics, isokineticDeficit: v})} 
+                            color="bg-rose-500" 
+                            criticalValue={10} // Anything above 10 is warning
+                            inverse={true} // Higher is worse
+                        />
+
                         <CustomSlider label="Psicológico" value={metrics.psychologicalReadiness} min={0} max={100} onChange={(v: number) => setMetrics({...metrics, psychologicalReadiness: v})} color="bg-blue-500" />
                         
                         <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">

@@ -268,8 +268,8 @@ const PostWizard: React.FC<PostWizardProps> = ({ onGenerate, isGenerating, initi
                                 <Flame className="w-6 h-6" />
                             </div>
                             <div>
-                                <h3 className="font-bold text-orange-900 text-sm uppercase tracking-wide">Modo Viral Ativado</h3>
-                                <p className="text-xs text-orange-700 mt-1 leading-relaxed font-medium">Foco total em retenção e headline chamativa baseada nas trends.</p>
+                                <h3 className="font-bold text-orange-900 text-sm uppercase tracking-wide">Modo Educativo de Alto Impacto</h3>
+                                <p className="text-xs text-orange-700 mt-1 leading-relaxed font-medium">Foco em tradução científica e autoridade técnica para educação de pacientes.</p>
                             </div>
                         </div>
                     )}
@@ -372,7 +372,7 @@ const PostWizard: React.FC<PostWizardProps> = ({ onGenerate, isGenerating, initi
                     ) : (
                         <button onClick={handleSubmit} className={`flex-1 bg-gradient-to-r ${isTrendMode ? 'from-orange-500 to-red-600' : 'from-blue-600 to-indigo-600'} text-white py-4 rounded-2xl font-bold shadow-xl flex items-center justify-center gap-3 active:scale-[0.98] text-sm uppercase tracking-wide transition-all`}>
                             <Sparkles className="w-5 h-5" />
-                            {isTrendMode ? 'Gerar Post Viral' : 'Gerar Post'}
+                            {isTrendMode ? 'Gerar Conteúdo Educativo' : 'Gerar Post'}
                         </button>
                     )}
                 </div>
