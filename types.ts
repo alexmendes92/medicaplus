@@ -451,8 +451,10 @@ export interface ScientificPublication {
 export interface PainPoint {
   x: number;
   y: number;
-  label: string; // 'Dermatomo L5', 'Joelho Anterior', etc.
+  label: string; 
   intensity: number; // 1-10
+  type?: 'pain' | 'instability' | 'maneuver'; // Extended type
+  details?: Record<string, string>; // e.g. { lachman: '+', pivot: '++' }
 }
 
 export interface OpmeMaterial {

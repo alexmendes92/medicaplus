@@ -4,7 +4,7 @@ import html2canvas from 'html2canvas';
 import { RTSMetrics, RTSHistoryEntry, UserProfile } from '../types';
 import { 
     Activity, Dumbbell, Brain, Ruler, CheckCircle, AlertTriangle, XCircle, 
-    Save, History, ChevronRight, TrendingUp, TrendingDown, Minus, RefreshCw, Share2, Flame
+    Save, History, ChevronRight, TrendingUp, TrendingDown, Minus, RefreshCw, Share2, Flame, Info
 } from 'lucide-react';
 
 interface ReturnToSportCalculatorProps {
@@ -102,9 +102,9 @@ const ReturnToSportCalculator: React.FC<ReturnToSportCalculatorProps> = ({ userP
   };
 
   const getStatus = (s: number) => {
-      if (s >= 90) return { label: 'APTO', color: 'text-emerald-500', stroke: '#10b981', bg: 'bg-emerald-500', msg: 'Retorno total liberado.' };
-      if (s >= 75) return { label: 'TREINO', color: 'text-amber-500', stroke: '#f59e0b', bg: 'bg-amber-500', msg: 'Retorno gradual/protegido.' };
-      return { label: 'INAPTO', color: 'text-rose-500', stroke: '#f43f5e', bg: 'bg-rose-500', msg: 'Manter reabilitação.' };
+      if (s >= 90) return { label: 'APTO', color: 'text-emerald-500', stroke: '#10b981', bg: 'bg-emerald-500', msg: 'Critérios de retorno atingidos.' };
+      if (s >= 75) return { label: 'TREINO', color: 'text-amber-500', stroke: '#f59e0b', bg: 'bg-amber-500', msg: 'Retorno gradual permitido.' };
+      return { label: 'INAPTO', color: 'text-rose-500', stroke: '#f43f5e', bg: 'bg-rose-500', msg: 'Manter reabilitação intensiva.' };
   };
 
   const status = getStatus(score);
@@ -173,8 +173,13 @@ const ReturnToSportCalculator: React.FC<ReturnToSportCalculatorProps> = ({ userP
       );
   };
 
-  const CustomSlider = ({ label, value, min, max, onChange, unit = '', color = 'bg-slate-900' }: any) => (
-    <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:border-slate-200 transition-all">
+  const CustomSlider = ({ label, value, min, max, onChange, unit = '', color = 'bg-slate-900', criticalValue }: any) => (
+    <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:border-slate-200 transition-all relative overflow-hidden">
+        {criticalValue && value < criticalValue && (
+            <div className="absolute right-0 top-0 bg-red-100 text-red-600 text-[9px] font-bold px-2 py-0.5 rounded-bl-lg flex items-center gap-1">
+                <AlertTriangle className="w-3 h-3" /> Abaixo da Meta
+            </div>
+        )}
         <div className="flex justify-between items-end mb-3">
             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</label>
             <span className={`text-sm font-black ${color.replace('bg-', 'text-')}`}>
@@ -347,10 +352,21 @@ const ReturnToSportCalculator: React.FC<ReturnToSportCalculatorProps> = ({ userP
                         </button>
                     </div>
 
+                    {/* Safety Disclaimer */}
+                    <div className="bg-amber-50 p-4 rounded-2xl border border-amber-100 flex items-start gap-3">
+                        <Info className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                        <div>
+                            <h4 className="text-xs font-bold text-amber-800 uppercase mb-1">Aviso de Segurança</h4>
+                            <p className="text-xs text-amber-700/80 leading-relaxed">
+                                Esta calculadora é uma ferramenta de apoio. Um LSI ou Hop Test {"<"} 90% indica risco elevado de re-lesão. A decisão final de retorno deve considerar exame clínico e funcional completo.
+                            </p>
+                        </div>
+                    </div>
+
                     {/* Inputs Section */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <CustomSlider label="Simetria (LSI)" value={metrics.limbSymmetry} min={0} max={100} unit="%" onChange={(v: number) => setMetrics({...metrics, limbSymmetry: v})} color="bg-indigo-500" />
-                        <CustomSlider label="Hop Test" value={metrics.hopTest} min={0} max={100} unit="%" onChange={(v: number) => setMetrics({...metrics, hopTest: v})} color="bg-violet-500" />
+                        <CustomSlider label="Simetria (LSI)" value={metrics.limbSymmetry} min={0} max={100} unit="%" onChange={(v: number) => setMetrics({...metrics, limbSymmetry: v})} color="bg-indigo-500" criticalValue={90} />
+                        <CustomSlider label="Hop Test" value={metrics.hopTest} min={0} max={100} unit="%" onChange={(v: number) => setMetrics({...metrics, hopTest: v})} color="bg-violet-500" criticalValue={90} />
                         <CustomSlider label="Psicológico" value={metrics.psychologicalReadiness} min={0} max={100} onChange={(v: number) => setMetrics({...metrics, psychologicalReadiness: v})} color="bg-blue-500" />
                         
                         <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">

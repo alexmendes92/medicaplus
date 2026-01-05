@@ -37,7 +37,8 @@ const PostWizard: React.FC<PostWizardProps> = ({ onGenerate, isGenerating, initi
         if (initialState.customInstructions) {
             setCustomInstructions(initialState.customInstructions);
         }
-        if (initialState.customInstructions || initialState.evidence) {
+        // Jump to Step 3 if topic is provided (Quick Start)
+        if (initialState.topic || initialState.customInstructions || initialState.evidence) {
             setStep(3);
         }
     }
@@ -270,6 +271,20 @@ const PostWizard: React.FC<PostWizardProps> = ({ onGenerate, isGenerating, initi
                                 <h3 className="font-bold text-orange-900 text-sm uppercase tracking-wide">Modo Viral Ativado</h3>
                                 <p className="text-xs text-orange-700 mt-1 leading-relaxed font-medium">Foco total em retenção e headline chamativa baseada nas trends.</p>
                             </div>
+                        </div>
+                    )}
+
+                    {/* Context Banner - Shows the topic if skipped from Dashboard */}
+                    {initialState?.topic && (
+                        <div className="bg-blue-50 px-4 py-3 rounded-xl border border-blue-100 flex items-center gap-3">
+                            <div className="bg-blue-100 p-1.5 rounded-lg">
+                                <Search className="w-4 h-4 text-blue-600" />
+                            </div>
+                            <div className="flex-1">
+                                <p className="text-[10px] font-bold text-blue-400 uppercase tracking-wider">Tema Selecionado</p>
+                                <p className="text-sm font-bold text-blue-900 truncate">{topic}</p>
+                            </div>
+                            <button onClick={() => setStep(2)} className="text-xs font-bold text-blue-600 hover:underline">Editar</button>
                         </div>
                     )}
 

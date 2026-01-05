@@ -5,12 +5,12 @@ import {
     Activity, Eye, Camera, Syringe, Weight, Pill, Utensils, 
     ChevronRight, AlertTriangle, CheckCircle2, UploadCloud, 
     Loader2, Scale, Calendar, Info, FlaskConical, PersonStanding, X, ArrowRight, ArrowLeft, Share2, Flame,
-    Muscle, Dumbbell, BookOpen
+    Dumbbell, BookOpen, Grip, Timer
 } from 'lucide-react';
 import { analyzeWoundImage, checkDrugInteractions, generateSupplementPlan } from '../services/geminiService';
 import { WoundAnalysisResult, DrugInteractionResult, SupplementPlan, UserProfile } from '../types';
 
-type Tool = 'sarcf' | 'wound' | 'valgus' | 'visco' | 'weight' | 'meds' | 'supplements';
+type Tool = 'sarcf' | 'wound' | 'joint_function' | 'visco' | 'weight' | 'meds' | 'supplements';
 
 interface ClinicalSuiteProps {
     userProfile?: UserProfile;
@@ -20,6 +20,49 @@ const ClinicalSuite: React.FC<ClinicalSuiteProps> = ({ userProfile }) => {
   const [activeTool, setActiveTool] = useState<Tool | null>(null);
   const [step, setStep] = useState(1);
   const captureRef = useRef<HTMLDivElement>(null);
+
+  // --- JOINT FUNCTION STATE (SCORE DE FUNCIONALIDADE) ---
+  const [jointData, setJointData] = useState({
+      age: '',
+      scoreType: 'IKDC', // 'IKDC' | 'Lysholm'
+      scoreVal: '',
+      handgrip: ''
+  });
+  const [jointResult, setJointResult] = useState<{
+      jointAge: number;
+      level: { label: string; color: string; bg: string; icon: any; msg: string };
+      diff: number;
+  } | null>(null);
+
+  const calculateJointFunction = () => {
+      const score = parseFloat(jointData.scoreVal);
+      const realAge = parseFloat(jointData.age);
+      
+      if (isNaN(score) || isNaN(realAge)) return;
+
+      // Heuristic Logic: 
+      // Score 100 = Peak Function (approx 20 years old)
+      // Score 50 = Severe Deficit (approx 80 years old)
+      // Formula: Age = 20 + 1.2 * (100 - Score)
+      let calcAge = 20 + 1.2 * (100 - score);
+      
+      // Handgrip adjustment (Systemic Strength Bonus)
+      // Simplified: >40kgf suggests good muscle reserve, reducing "biological age" impact
+      if (jointData.handgrip && parseFloat(jointData.handgrip) > 40) {
+          calcAge -= 5;
+      }
+
+      const jointAge = Math.min(90, Math.max(18, Math.round(calcAge)));
+      
+      let level;
+      if (score >= 90) level = { label: 'Alta Performance (Top 10%)', color: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-100', icon: Flame, msg: 'Função articular excelente, compatível com atletas.' };
+      else if (score >= 70) level = { label: 'Função Preservada', color: 'text-blue-600', bg: 'bg-blue-50 border-blue-100', icon: CheckCircle2, msg: 'Dentro da média esperada para adultos ativos.' };
+      else if (score >= 50) level = { label: 'Déficit Funcional Moderado', color: 'text-amber-600', bg: 'bg-amber-50 border-amber-100', icon: AlertTriangle, msg: 'Sinais de alerta. Indica necessidade de reabilitação.' };
+      else level = { label: 'Déficit Severo', color: 'text-red-600', bg: 'bg-red-50 border-red-100', icon: X, msg: 'Comprometimento significativo da qualidade de vida.' };
+
+      setJointResult({ jointAge, level, diff: jointAge - realAge });
+      setStep(2);
+  };
 
   // --- SARC-F STATE (Validado Cientificamente) ---
   const [sarcAnswers, setSarcAnswers] = useState({
@@ -37,7 +80,7 @@ const ClinicalSuite: React.FC<ClinicalSuiteProps> = ({ userProfile }) => {
       setStep(6); // Result screen
   };
 
-  const handleShareResult = async () => {
+  const handleShareResult = async (title: string = 'Resultado Clínico') => {
       if (captureRef.current) {
           try {
               const canvas = await html2canvas(captureRef.current, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
@@ -45,7 +88,7 @@ const ClinicalSuite: React.FC<ClinicalSuiteProps> = ({ userProfile }) => {
                   if (blob) {
                       const file = new File([blob], 'resultado_clinico.png', { type: 'image/png' });
                       if (navigator.share) {
-                          try { await navigator.share({ files: [file], title: 'Resultado Clínico' }); } catch (e) { console.log(e); }
+                          try { await navigator.share({ files: [file], title: title }); } catch (e) { console.log(e); }
                       } else {
                           const link = document.createElement('a');
                           link.download = 'resultado.png';
@@ -67,7 +110,7 @@ const ClinicalSuite: React.FC<ClinicalSuiteProps> = ({ userProfile }) => {
   const handleWoundUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
       if (e.target.files && e.target.files[0]) {
           const reader = new FileReader();
-          reader.onloadend = () => {
+          reader.onload = () => {
               setWoundImage(reader.result as string);
               setStep(2);
           };
@@ -131,6 +174,8 @@ const ClinicalSuite: React.FC<ClinicalSuiteProps> = ({ userProfile }) => {
       setWoundAnalysis(null);
       setMedResult(null);
       setSuppPlan(null);
+      setJointResult(null);
+      setJointData({ age: '', scoreType: 'IKDC', scoreVal: '', handgrip: '' });
   };
 
   const ProgressDots = ({ total, current }: { total: number, current: number }) => (
@@ -193,6 +238,137 @@ const ClinicalSuite: React.FC<ClinicalSuiteProps> = ({ userProfile }) => {
 
   const renderToolContent = () => {
       switch(activeTool) {
+          case 'joint_function':
+              return (
+                  <ToolLayout
+                    footer={
+                        step === 1 ? <NextButton onClick={calculateJointFunction} disabled={!jointData.age || !jointData.scoreVal} label="Analisar Função" /> :
+                        <div className="flex gap-3">
+                            <button onClick={() => handleShareResult('Score Funcional')} className="flex-1 bg-indigo-600 text-white py-4 rounded-xl font-bold text-sm shadow-lg flex items-center justify-center gap-2 active:scale-95">
+                                <Share2 className="w-4 h-4" /> Relatório
+                            </button>
+                            <button onClick={closeTool} className="flex-1 text-slate-400 font-bold text-sm border border-slate-200 rounded-xl hover:bg-slate-50">
+                                Novo
+                            </button>
+                        </div>
+                    }
+                  >
+                      {step === 1 && (
+                          <div className="animate-fadeIn">
+                              <StepHeader title="Score de Funcionalidade" desc="Análise baseada em scores validados (IKDC/Lysholm)." />
+                              
+                              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+                                  {/* Age Input */}
+                                  <div>
+                                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Idade do Paciente</label>
+                                      <div className="relative">
+                                          <Calendar className="absolute left-4 top-3.5 w-5 h-5 text-slate-400" />
+                                          <input 
+                                              type="number" 
+                                              value={jointData.age} 
+                                              onChange={e => setJointData({...jointData, age: e.target.value})}
+                                              placeholder="Anos"
+                                              className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 outline-none focus:border-blue-500"
+                                          />
+                                      </div>
+                                  </div>
+
+                                  {/* Score Toggle */}
+                                  <div>
+                                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Tipo de Score</label>
+                                      <div className="flex bg-slate-100 p-1 rounded-xl mb-3">
+                                          {['IKDC', 'Lysholm'].map(type => (
+                                              <button 
+                                                  key={type}
+                                                  onClick={() => setJointData({...jointData, scoreType: type as any})}
+                                                  className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${jointData.scoreType === type ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}
+                                              >
+                                                  {type}
+                                              </button>
+                                          ))}
+                                      </div>
+                                      <div className="relative">
+                                          <Activity className="absolute left-4 top-3.5 w-5 h-5 text-slate-400" />
+                                          <input 
+                                              type="number" 
+                                              value={jointData.scoreVal} 
+                                              onChange={e => setJointData({...jointData, scoreVal: e.target.value})}
+                                              placeholder="Valor (0-100)"
+                                              className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 outline-none focus:border-blue-500"
+                                          />
+                                      </div>
+                                  </div>
+
+                                  {/* Handgrip */}
+                                  <div>
+                                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block flex justify-between">
+                                          <span>Handgrip (Opcional)</span>
+                                          <span className="text-blue-600 font-normal normal-case">Dinapometria</span>
+                                      </label>
+                                      <div className="relative">
+                                          <Dumbbell className="absolute left-4 top-3.5 w-5 h-5 text-slate-400" />
+                                          <input 
+                                              type="number" 
+                                              value={jointData.handgrip} 
+                                              onChange={e => setJointData({...jointData, handgrip: e.target.value})}
+                                              placeholder="Kgf (Força)"
+                                              className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 outline-none focus:border-blue-500"
+                                          />
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      )}
+
+                      {step === 2 && jointResult && (
+                          <div className="animate-scaleIn">
+                              <div ref={captureRef} className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-xl text-center relative overflow-hidden mb-4">
+                                  {/* Branding */}
+                                  <div className="flex items-center justify-center gap-2 mb-6 border-b border-slate-50 pb-2">
+                                      <Flame className="w-3 h-3 text-slate-900" />
+                                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-900">{userProfile?.name || 'MediSocial AI'}</span>
+                                  </div>
+
+                                  <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Score Funcional Equivalente</h3>
+                                  
+                                  {/* Visual Gauge */}
+                                  <div className="relative w-56 h-56 mx-auto mb-8 flex items-center justify-center">
+                                      <div className={`absolute inset-0 rounded-full border-[12px] opacity-20 ${jointResult.level.color.replace('text-', 'border-')}`}></div>
+                                      <div className={`absolute inset-0 rounded-full border-[12px] border-t-transparent border-l-transparent transform -rotate-45 ${jointResult.level.color.replace('text-', 'border-')}`}></div>
+                                      
+                                      <div className="flex flex-col items-center relative z-10">
+                                          <span className="text-xs font-bold text-slate-400 mb-1">Idade Funcional</span>
+                                          <span className={`text-7xl font-black tracking-tighter leading-none ${jointResult.level.color}`}>
+                                              {jointResult.jointAge}
+                                          </span>
+                                          <span className="text-sm font-bold text-slate-500">anos</span>
+                                      </div>
+                                  </div>
+
+                                  {/* Comparison Text */}
+                                  <div className={`p-4 rounded-2xl mb-6 ${jointResult.level.bg}`}>
+                                      <div className="flex items-center justify-center gap-2 mb-2">
+                                          <jointResult.level.icon className={`w-5 h-5 ${jointResult.level.color}`} />
+                                          <span className={`font-black text-sm uppercase tracking-wide ${jointResult.level.color}`}>{jointResult.level.label}</span>
+                                      </div>
+                                      <p className="text-xs font-bold text-slate-600 leading-relaxed max-w-[250px] mx-auto">
+                                          {jointResult.diff > 5 
+                                            ? `Sua função articular equivale a um joelho de ${jointResult.jointAge} anos (Envelhecimento Funcional).`
+                                            : jointResult.diff < -5
+                                            ? `Parabéns! Sua função equivale a um joelho de ${jointResult.jointAge} anos (Rejuvenescimento Funcional).`
+                                            : `Sua função está compatível com sua idade cronológica.`
+                                          }
+                                      </p>
+                                  </div>
+
+                                  <div className="text-[10px] text-slate-400 font-medium border-t border-slate-50 pt-2">
+                                      Baseado no score {jointData.scoreType} ({jointData.scoreVal}) {jointData.handgrip && `+ Handgrip ${jointData.handgrip}kgf`}
+                                  </div>
+                              </div>
+                          </div>
+                      )}
+                  </ToolLayout>
+              );
           case 'sarcf':
               return (
                   <ToolLayout
@@ -200,7 +376,7 @@ const ClinicalSuite: React.FC<ClinicalSuiteProps> = ({ userProfile }) => {
                         step < 6 ? <NextButton onClick={() => setStep(s => s + 1)} /> :
                         step === 5 ? <NextButton onClick={calculateSarcF} label="Calcular Risco" /> :
                         <div className="flex gap-3">
-                            <button onClick={handleShareResult} className="flex-1 bg-indigo-600 text-white py-4 rounded-xl font-bold text-sm shadow-lg flex items-center justify-center gap-2 active:scale-95">
+                            <button onClick={() => handleShareResult('Resultado SARC-F')} className="flex-1 bg-indigo-600 text-white py-4 rounded-xl font-bold text-sm shadow-lg flex items-center justify-center gap-2 active:scale-95">
                                 <Share2 className="w-4 h-4" /> Relatório
                             </button>
                             <button onClick={() => { setStep(1); setSarcAnswers({ strength: 0, walking: 0, rising: 0, stairs: 0, falls: 0 }); }} className="flex-1 text-slate-400 font-bold text-sm border border-slate-200 rounded-xl hover:bg-slate-50">
@@ -510,14 +686,6 @@ const ClinicalSuite: React.FC<ClinicalSuiteProps> = ({ userProfile }) => {
                       )}
                   </ToolLayout>
               );
-          case 'valgus':
-              return (
-                  <div className="max-w-md mx-auto text-center pt-20 text-slate-400">
-                      <Camera className="w-16 h-16 mx-auto mb-4 opacity-20" />
-                      <p className="font-bold">Módulo em Desenvolvimento</p>
-                      <button onClick={closeTool} className="mt-4 text-sm text-blue-600 underline">Voltar</button>
-                  </div>
-              );
           default: return null;
       }
   };
@@ -563,7 +731,9 @@ const ClinicalSuite: React.FC<ClinicalSuiteProps> = ({ userProfile }) => {
                         <h1 className="text-2xl font-black text-slate-900 tracking-tight">Ferramentas de Consultório</h1>
                         <p className="text-sm text-slate-500 font-medium">Utilitários para avaliação rápida e suporte à decisão.</p>
                     </div>
-                    <ToolCard id="sarcf" icon={Activity} title="SARC-F" desc="Rastreio de sarcopenia e risco de quedas." color="text-green-600 bg-green-600" />
+                    
+                    <ToolCard id="joint_function" icon={Timer} title="Funcionalidade Articular" desc="Comparativo de Idade Articular vs Cronológica." color="text-purple-600 bg-purple-600" />
+                    <ToolCard id="sarcf" icon={Activity} title="SARC-F" desc="Rastreio de sarcopenia em idosos." color="text-green-600 bg-green-600" />
                     <ToolCard id="wound" icon={Eye} title="Wound AI" desc="Análise de feridas por visão computacional." color="text-red-500 bg-red-500" />
                     <ToolCard id="visco" icon={Syringe} title="Ciclo Visco" desc="Gestão de datas do Ácido Hialurônico." color="text-blue-500 bg-blue-500" />
                     <ToolCard id="weight" icon={Weight} title="Carga Articular" desc="Biomecânica do impacto do peso." color="text-orange-500 bg-orange-500" />

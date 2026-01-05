@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { 
-  Plus, Video, BookOpen, TrendingUp, Sparkles, ChevronRight, Calendar, Activity, Users, PieChart, QrCode, Newspaper, Globe, Bone, GraduationCap, FlaskConical, FileText, Stethoscope, Briefcase, Share2, ShieldCheck, Microscope
+  Plus, Video, BookOpen, TrendingUp, Sparkles, ChevronRight, Calendar, Activity, Users, PieChart, QrCode, Newspaper, Globe, Bone, GraduationCap, FlaskConical, FileText, Stethoscope, Briefcase, Share2, ShieldCheck, Microscope, Wand2
 } from 'lucide-react';
 import { getUpcomingHolidays, Holiday } from '../services/externalApis';
 import { UserProfile } from '../types';
@@ -131,7 +131,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onSelectTool, onQuickAction, user
                           type="text" 
                           value={inputValue}
                           onChange={(e) => setInputValue(e.target.value)}
-                          placeholder={mode === 'clinical' ? "Buscar protocolo, score ou anatomia..." : "Sobre o que vamos criar hoje?"}
+                          placeholder={mode === 'clinical' ? "Buscar protocolo, score ou anatomia..." : "Digite um tema para criar um post rápido..."}
                           className={`flex-1 py-4 bg-transparent border-none focus:outline-none text-lg font-medium ${mode === 'clinical' ? 'text-slate-900 placeholder:text-slate-400' : 'text-white placeholder:text-slate-500'}`}
                           onKeyDown={(e) => { if (e.key === 'Enter') handleInputSubmit(); }}
                       />
@@ -139,7 +139,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onSelectTool, onQuickAction, user
                         onClick={handleInputSubmit}
                         className={`text-white p-3.5 rounded-xl shadow-lg transition-colors active:scale-95 ${mode === 'clinical' ? 'bg-slate-900 hover:bg-blue-600' : 'bg-indigo-600 hover:bg-indigo-500'}`}
                       >
-                          <ChevronRight className="w-5 h-5" />
+                          {mode === 'marketing' ? <Wand2 className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
                       </button>
                   </div>
               </div>

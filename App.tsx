@@ -106,6 +106,10 @@ function App() {
   // EFFECTS
   useEffect(() => {
     localStorage.setItem('medisocial_last_view', viewMode);
+    // Clear wizard state if not in post creation mode to ensure fresh starts
+    if (viewMode !== 'post') {
+        setWizardInitialState(null);
+    }
   }, [viewMode]);
 
   useEffect(() => {
@@ -203,11 +207,26 @@ function App() {
 
   // New Quick Start Handler
   const handleQuickStart = (topic: string) => {
+      // Heuristic to detect format
+      let format = PostFormat.FEED;
+      const lowerTopic = topic.toLowerCase();
+      if (lowerTopic.includes('story') || lowerTopic.includes('stories') || lowerTopic.includes('reels') || lowerTopic.includes('video')) {
+          format = PostFormat.STORY;
+      }
+
+      // Heuristic to detect category
+      let category = PostCategory.PATHOLOGY;
+      if (lowerTopic.includes('cirurgia') || lowerTopic.includes('operar') || lowerTopic.includes('protese')) {
+          category = PostCategory.SURGERY;
+      } else if (lowerTopic.includes('esporte') || lowerTopic.includes('corrida') || lowerTopic.includes('academia')) {
+          category = PostCategory.SPORTS;
+      }
+
       const newState: PostState = {
           topic: topic,
-          category: PostCategory.PATHOLOGY, // Default
-          tone: Tone.PROFESSIONAL, // Default
-          format: PostFormat.FEED, // Default
+          category: category,
+          tone: userProfile.defaultTone || Tone.PROFESSIONAL,
+          format: format,
           customInstructions: ''
       };
       setWizardInitialState(newState);
