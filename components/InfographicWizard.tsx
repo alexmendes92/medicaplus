@@ -20,15 +20,16 @@ const InfographicWizard: React.FC<InfographicWizardProps> = ({ onGenerate, isGen
   };
 
   return (
-    <div className="flex flex-col h-full min-h-full animate-fadeIn pb-24 lg:pb-0 lg:h-full lg:min-h-full">
+    <div className="flex flex-col h-full w-full animate-fadeIn bg-white/50">
         
         {/* Simple Steps */}
-        <div className="flex gap-2 mb-8 shrink-0">
+        <div className="flex gap-2 mb-8 shrink-0 px-6 pt-6">
             <div className={`h-1.5 flex-1 rounded-full transition-colors ${step >= 1 ? 'bg-indigo-500' : 'bg-slate-100'}`} />
             <div className={`h-1.5 flex-1 rounded-full transition-colors ${step >= 2 ? 'bg-indigo-500' : 'bg-slate-100'}`} />
         </div>
 
-        <div className="flex-1 overflow-y-auto no-scrollbar px-1 lg:flex-1">
+        <div className="flex-1 overflow-y-auto no-scrollbar p-6">
+            <div className="max-w-3xl mx-auto">
             
             {/* STEP 1: Diagnosis */}
             {step === 1 && (
@@ -102,10 +103,11 @@ const InfographicWizard: React.FC<InfographicWizardProps> = ({ onGenerate, isGen
                     </div>
                 </div>
             )}
+            </div>
         </div>
 
          {/* Navigation / Animation - Fixed Footer */}
-         <div className="pt-6 mt-auto border-t border-slate-100 bg-white z-10 flex items-center gap-3 sticky bottom-0 lg:static lg:mt-auto">
+         <div className="p-6 border-t border-slate-100 bg-white z-20 shrink-0">
              {isGenerating ? (
                  <div className="w-full flex flex-col items-center justify-center py-4 animate-fadeIn">
                      <div className="relative mb-3">
@@ -119,7 +121,7 @@ const InfographicWizard: React.FC<InfographicWizardProps> = ({ onGenerate, isGen
                      <p className="text-xs text-slate-400 animate-pulse">Estruturando sintomas e tratamentos</p>
                  </div>
              ) : (
-                 <>
+                 <div className="flex gap-3 max-w-3xl mx-auto w-full items-center">
                     {step > 1 && (
                         <button onClick={() => setStep(1)} className="p-4 rounded-xl text-slate-400 hover:bg-slate-50 transition-colors">
                             <ArrowLeft className="w-6 h-6" />
@@ -140,7 +142,7 @@ const InfographicWizard: React.FC<InfographicWizardProps> = ({ onGenerate, isGen
                              <Sparkles className="w-5 h-5 group-hover:scale-110 transition-transform" /> Gerar Visual
                         </button>
                     )}
-                 </>
+                 </div>
              )}
         </div>
     </div>

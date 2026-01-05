@@ -122,9 +122,9 @@ const PostWizard: React.FC<PostWizardProps> = ({ onGenerate, isGenerating, initi
   const progress = (step / 3) * 100;
 
   return (
-    <div className="flex flex-col h-full min-h-full animate-fadeIn w-full lg:h-full lg:min-h-full">
+    <div className="flex flex-col h-full w-full animate-fadeIn bg-white/50">
         {/* Header Progress */}
-        <div className="mb-6 px-2 shrink-0">
+        <div className="px-6 pt-6 shrink-0">
             <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">
                 <span>Passo {step} de 3</span>
                 <span>{step === 1 ? 'Formato' : step === 2 ? 'Conteúdo' : 'Estilo'}</span>
@@ -135,7 +135,8 @@ const PostWizard: React.FC<PostWizardProps> = ({ onGenerate, isGenerating, initi
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto no-scrollbar px-2 pb-4 scroll-smooth lg:flex-1">
+        <div className="flex-1 overflow-y-auto no-scrollbar p-6 scroll-smooth">
+            <div className="max-w-3xl mx-auto">
             
             {step === 1 && (
                 <div className="space-y-6 animate-slideUp">
@@ -336,10 +337,12 @@ const PostWizard: React.FC<PostWizardProps> = ({ onGenerate, isGenerating, initi
                     </div>
                 </div>
             )}
+            </div>
         </div>
 
-        {/* Bottom Actions - Sticky Footer for Desktop */}
-        <div className="pt-4 border-t border-slate-100 bg-white -mx-4 px-6 pb-6 mt-auto z-10 sticky bottom-0 lg:static lg:mt-auto">
+        {/* Bottom Actions - Fixed Footer for Desktop */}
+        <div className="p-6 border-t border-slate-100 bg-white shrink-0 z-20">
+            <div className="max-w-3xl mx-auto">
             {isGenerating ? (
                 <div className="w-full py-2 animate-fadeIn">
                     <div className="flex justify-between mb-2 px-1">
@@ -377,6 +380,7 @@ const PostWizard: React.FC<PostWizardProps> = ({ onGenerate, isGenerating, initi
                     )}
                 </div>
             )}
+            </div>
         </div>
     </div>
   );

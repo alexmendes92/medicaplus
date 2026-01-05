@@ -29,10 +29,10 @@ const ConversionWizard: React.FC<ConversionWizardProps> = ({ onGenerate, isGener
   ];
 
   return (
-    <div className="flex flex-col h-full min-h-full animate-fadeIn pb-24 lg:pb-0 lg:h-full lg:min-h-full">
+    <div className="flex flex-col h-full w-full animate-fadeIn bg-white/50">
         
         {/* Step Indicator */}
-        <div className="flex items-center justify-between mb-8 px-2 shrink-0">
+        <div className="flex items-center justify-between mb-8 shrink-0 px-6 pt-6">
             <div className={`flex flex-col items-center gap-2 ${step === 1 ? 'text-red-600' : 'text-slate-400'}`}>
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2 ${step === 1 ? 'border-red-600 bg-red-50' : 'border-slate-200'}`}>1</div>
                 <span className="text-[10px] font-bold uppercase">Estratégia</span>
@@ -44,7 +44,8 @@ const ConversionWizard: React.FC<ConversionWizardProps> = ({ onGenerate, isGener
             </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto no-scrollbar px-1 lg:flex-1">
+        <div className="flex-1 overflow-y-auto no-scrollbar p-6">
+            <div className="max-w-3xl mx-auto">
             
             {/* STEP 1: Format & Pathology */}
             {step === 1 && (
@@ -135,11 +136,11 @@ const ConversionWizard: React.FC<ConversionWizardProps> = ({ onGenerate, isGener
                     </div>
                 </div>
             )}
-
+            </div>
         </div>
 
         {/* Navigation / Animation - Fixed Footer */}
-        <div className="pt-6 mt-auto border-t border-slate-100 bg-white z-10 flex items-center gap-3 sticky bottom-0 lg:static lg:mt-auto">
+        <div className="p-6 border-t border-slate-100 bg-white shrink-0 z-20">
              {isGenerating ? (
                  <div className="w-full flex flex-col items-center justify-center py-4 animate-fadeIn">
                      <div className="relative mb-3">
@@ -155,7 +156,7 @@ const ConversionWizard: React.FC<ConversionWizardProps> = ({ onGenerate, isGener
                      <p className="text-xs text-slate-400 animate-pulse">Criando argumentos irrefutáveis</p>
                  </div>
              ) : (
-                 <>
+                 <div className="flex gap-3 max-w-3xl mx-auto w-full items-center">
                     {step > 1 && (
                         <button onClick={() => setStep(1)} className="p-4 rounded-xl text-slate-400 hover:bg-slate-50 transition-colors">
                             <ArrowLeft className="w-6 h-6" />
@@ -171,7 +172,7 @@ const ConversionWizard: React.FC<ConversionWizardProps> = ({ onGenerate, isGener
                              <Zap className="w-5 h-5 group-hover:text-yellow-300 transition-colors" /> Quebrar Objeção
                         </button>
                     )}
-                 </>
+                 </div>
              )}
         </div>
     </div>

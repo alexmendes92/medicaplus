@@ -139,7 +139,7 @@ const VideoWizard: React.FC = () => {
   }
 
   return (
-    <div className="h-full min-h-full flex flex-col bg-slate-950 pb-24 lg:pb-0 animate-fadeIn relative overflow-hidden lg:h-full lg:min-h-full">
+    <div className="h-full min-h-full flex flex-col bg-slate-950 animate-fadeIn relative overflow-hidden lg:h-full lg:min-h-full">
         
         {/* Background Effects */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-red-900/20 rounded-full blur-[100px] pointer-events-none"></div>
@@ -163,11 +163,11 @@ const VideoWizard: React.FC = () => {
             </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-6 relative z-10 lg:flex-1">
+        <div className="flex-1 overflow-y-auto px-6 py-4 relative z-10">
             
             {/* SCRIPT WIZARD */}
             {activeTab === 'script' && (
-                <div className="max-w-2xl mx-auto space-y-8 animate-slideUp py-4">
+                <div className="max-w-2xl mx-auto space-y-8 animate-slideUp">
                     
                     <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-8 relative overflow-hidden group">
                         <div className="absolute top-0 left-0 w-1 h-full bg-red-600"></div>
@@ -240,7 +240,7 @@ const VideoWizard: React.FC = () => {
 
             {/* PODCAST WIZARD */}
             {activeTab === 'podcast' && (
-                <div className="max-w-2xl mx-auto space-y-8 animate-slideUp py-4">
+                <div className="max-w-2xl mx-auto space-y-8 animate-slideUp">
                     <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-10 text-center relative overflow-hidden">
                         {/* Audio Wave Visuals */}
                         <div className="absolute top-1/2 left-0 right-0 h-32 -translate-y-1/2 flex items-center justify-center gap-1 opacity-10 pointer-events-none">
@@ -298,7 +298,7 @@ const VideoWizard: React.FC = () => {
         </div>
 
         {/* Fixed Footer for Actions */}
-        <div className="p-6 border-t border-slate-900 bg-slate-950 z-20 shrink-0 mt-auto sticky bottom-0 lg:static lg:mt-auto">
+        <div className="p-6 border-t border-slate-900 bg-slate-950 z-20 shrink-0">
             <div className="max-w-2xl mx-auto">
                 {activeTab === 'script' ? (
                     <button 

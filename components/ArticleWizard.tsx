@@ -110,10 +110,10 @@ const ArticleWizard: React.FC<ArticleWizardProps> = ({ onGenerate, isGenerating,
   const stepTitles = ['Conceito', 'Persona', 'Dores', 'Estilo', 'SEO'];
 
   return (
-    <div className="flex flex-col h-full min-h-full animate-fadeIn pb-24 lg:pb-0 lg:h-full lg:min-h-full">
+    <div className="flex flex-col h-full w-full animate-fadeIn bg-white/50">
         
         {/* Progress Header */}
-        <div className="mb-6 px-1 shrink-0">
+        <div className="px-6 pt-6 shrink-0">
              <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
                 <span>Fase {step} de 5</span>
                 <span>{stepTitles[step - 1]}</span>
@@ -123,7 +123,9 @@ const ArticleWizard: React.FC<ArticleWizardProps> = ({ onGenerate, isGenerating,
             </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto no-scrollbar px-1 pb-4 lg:flex-1">
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto no-scrollbar p-6">
+            <div className="max-w-3xl mx-auto">
             
             {/* Step 1: Concept */}
             {step === 1 && (
@@ -311,10 +313,11 @@ const ArticleWizard: React.FC<ArticleWizardProps> = ({ onGenerate, isGenerating,
                     </div>
                 </div>
             )}
+            </div>
         </div>
 
         {/* Navigation / Loading Animation - Fixed Footer Style */}
-        <div className="pt-4 border-t border-slate-100 bg-white -mx-4 px-6 pb-6 mt-auto z-10 sticky bottom-0 lg:static lg:mt-auto">
+        <div className="p-6 border-t border-slate-100 bg-white shrink-0 z-20">
              {isGenerating ? (
                  <div className="w-full flex flex-col items-center justify-center py-2 animate-fadeIn">
                      <div className="flex gap-1 mb-2">
@@ -325,7 +328,7 @@ const ArticleWizard: React.FC<ArticleWizardProps> = ({ onGenerate, isGenerating,
                      <p className="text-xs font-bold text-slate-500 uppercase tracking-widest animate-pulse">Escrevendo Artigo...</p>
                  </div>
              ) : (
-                 <div className="flex gap-3">
+                 <div className="flex gap-3 max-w-3xl mx-auto w-full">
                     {step > 1 && (
                         <button onClick={handleBack} className="p-4 rounded-2xl bg-white border border-slate-200 text-slate-500 hover:bg-slate-50 active:scale-95 shadow-sm transition-all">
                             <ArrowLeft className="w-5 h-5" />
