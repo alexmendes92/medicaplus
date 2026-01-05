@@ -122,7 +122,7 @@ const PostWizard: React.FC<PostWizardProps> = ({ onGenerate, isGenerating, initi
   const progress = (step / 3) * 100;
 
   return (
-    <div className="flex flex-col h-full min-h-full animate-fadeIn w-full">
+    <div className="flex flex-col h-full min-h-full animate-fadeIn w-full lg:h-full lg:min-h-full">
         {/* Header Progress */}
         <div className="mb-6 px-2 shrink-0">
             <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">
@@ -135,7 +135,7 @@ const PostWizard: React.FC<PostWizardProps> = ({ onGenerate, isGenerating, initi
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto no-scrollbar px-2 pb-4 scroll-smooth">
+        <div className="flex-1 overflow-y-auto no-scrollbar px-2 pb-4 scroll-smooth lg:flex-1">
             
             {step === 1 && (
                 <div className="space-y-6 animate-slideUp">
@@ -339,7 +339,7 @@ const PostWizard: React.FC<PostWizardProps> = ({ onGenerate, isGenerating, initi
         </div>
 
         {/* Bottom Actions - Sticky Footer for Desktop */}
-        <div className="pt-4 border-t border-slate-100 bg-white -mx-4 px-6 pb-6 mt-auto z-10 sticky bottom-0">
+        <div className="pt-4 border-t border-slate-100 bg-white -mx-4 px-6 pb-6 mt-auto z-10 sticky bottom-0 lg:static lg:mt-auto">
             {isGenerating ? (
                 <div className="w-full py-2 animate-fadeIn">
                     <div className="flex justify-between mb-2 px-1">

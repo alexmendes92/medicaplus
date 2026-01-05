@@ -14,9 +14,9 @@ const commonSafetySettings = [
 
 // --- PERSONA MANAGEMENT (CONTEXT INJECTION) ---
 let currentUserProfile: UserProfile = {
-    name: "Dr. Carlos Franciozi",
-    specialty: "Cirurgião de Joelho e Ombro",
-    crm: "111501",
+    name: "Dr. André Silva",
+    specialty: "Cirurgião Ortopédico",
+    crm: "123456",
     defaultTone: Tone.PROFESSIONAL
 };
 

@@ -29,7 +29,7 @@ const ConversionWizard: React.FC<ConversionWizardProps> = ({ onGenerate, isGener
   ];
 
   return (
-    <div className="flex flex-col h-full min-h-full animate-fadeIn pb-24 lg:pb-0">
+    <div className="flex flex-col h-full min-h-full animate-fadeIn pb-24 lg:pb-0 lg:h-full lg:min-h-full">
         
         {/* Step Indicator */}
         <div className="flex items-center justify-between mb-8 px-2 shrink-0">
@@ -44,7 +44,7 @@ const ConversionWizard: React.FC<ConversionWizardProps> = ({ onGenerate, isGener
             </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto no-scrollbar px-1">
+        <div className="flex-1 overflow-y-auto no-scrollbar px-1 lg:flex-1">
             
             {/* STEP 1: Format & Pathology */}
             {step === 1 && (
@@ -139,7 +139,7 @@ const ConversionWizard: React.FC<ConversionWizardProps> = ({ onGenerate, isGener
         </div>
 
         {/* Navigation / Animation - Fixed Footer */}
-        <div className="pt-6 mt-auto border-t border-slate-100 bg-white z-10 flex items-center gap-3 sticky bottom-0">
+        <div className="pt-6 mt-auto border-t border-slate-100 bg-white z-10 flex items-center gap-3 sticky bottom-0 lg:static lg:mt-auto">
              {isGenerating ? (
                  <div className="w-full flex flex-col items-center justify-center py-4 animate-fadeIn">
                      <div className="relative mb-3">

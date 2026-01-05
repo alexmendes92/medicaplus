@@ -67,9 +67,9 @@ function App() {
       }
       // Default empty profile for SaaS onboarding
       return {
-          name: "Seu Nome",
-          specialty: "Ortopedia",
-          crm: "00000",
+          name: "Dr. André Silva",
+          specialty: "Ortopedia e Traumatologia",
+          crm: "123456",
           defaultTone: Tone.PROFESSIONAL,
           photoUrl: ""
       };
@@ -248,6 +248,7 @@ function App() {
   const hasResult = postResult || articleResult || infographicResult || conversionResult;
   const isGenerating = postLoading || articleLoading || infographicLoading || conversionLoading;
   const isFullPageTool = ['trends', 'calculator', 'materials', 'site', 'publications', 'anatomy', 'card', 'scores', 'frax', 'prescription', 'news', 'journey', 'video', 'clinical', 'marketing_roi', 'patients', 'calculators', 'weight', 'visco', 'settings'].includes(viewMode);
+  const isWizardMode = ['post', 'seo', 'video', 'infographic', 'conversion', 'journey'].includes(viewMode);
   const showPreview = hasResult || isGenerating;
 
   // --- MENU CONFIGURATION ---
@@ -401,7 +402,8 @@ function App() {
                   <div className="flex flex-col h-full relative">
                        {/* Input Area (Hidden on Desktop if preview active, visible on mobile) */}
                        <div className={`flex-1 relative flex flex-col ${showPreview ? 'hidden lg:flex' : 'flex'} ${!isFullPageTool ? 'overflow-hidden' : 'overflow-hidden'}`}>
-                            <div className={`flex-1 overflow-y-auto no-scrollbar ${isFullPageTool ? 'w-full' : 'p-0 lg:p-6 w-full lg:max-w-3xl lg:mx-auto'}`}>
+                            {/* We switch overflow behavior based on wizard mode to fix double scrollbars/sticky issues */}
+                            <div className={`flex-1 ${isWizardMode ? 'overflow-hidden flex flex-col' : 'overflow-y-auto no-scrollbar p-0 lg:p-6'} w-full lg:max-w-3xl lg:mx-auto`}>
                                 {error && (
                                     <div className="p-4 mb-6 bg-red-50 border border-red-100 text-red-700 rounded-xl flex items-center gap-3 text-sm animate-fadeIn mx-6 mt-6 shadow-sm">
                                         <div className="w-2 h-2 rounded-full bg-red-500"></div>

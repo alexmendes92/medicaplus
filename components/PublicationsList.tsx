@@ -139,7 +139,7 @@ const PublicationsList: React.FC<PublicationsListProps> = ({ onUseArticle }) => 
                         </div>
                     </div>
 
-                    {/* Left Column: Source Content (Visible if Desktop OR MobileTab == 'content') */}
+                    {/* Left Column: Source Content (Visible if Desktop OR Mobile Tab == 'content') */}
                     <div className={`flex-1 flex flex-col h-full bg-white lg:border-r border-slate-100 relative ${mobileTab === 'content' ? 'flex' : 'hidden lg:flex'}`}>
                         {/* Desktop Header */}
                         <div className="hidden lg:flex px-8 py-6 border-b border-slate-100 bg-white sticky top-0 z-10 justify-between items-start">
@@ -179,7 +179,7 @@ const PublicationsList: React.FC<PublicationsListProps> = ({ onUseArticle }) => 
                         </div>
                     </div>
 
-                    {/* Right Column: AI Refinery (Visible if Desktop OR MobileTab == 'studio') */}
+                    {/* Right Column: AI Refinery (Visible if Desktop OR Mobile Tab == 'studio') */}
                     <div className={`w-full lg:w-[450px] bg-slate-900 text-white flex flex-col relative overflow-hidden border-l border-slate-800 shrink-0 ${mobileTab === 'studio' ? 'flex h-full' : 'hidden lg:flex'}`}>
                         {/* Background Effects */}
                         <div className="absolute top-0 right-0 w-80 h-80 bg-blue-600/20 rounded-full blur-[100px] pointer-events-none"></div>
@@ -303,7 +303,7 @@ const PublicationsList: React.FC<PublicationsListProps> = ({ onUseArticle }) => 
                         <GraduationCap className="w-6 h-6 text-blue-600" />
                         Acervo Científico
                     </h1>
-                    <p className="text-sm text-slate-500 font-medium mt-1">79 Publicações do Dr. Carlos Franciozi</p>
+                    <p className="text-sm text-slate-500 font-medium mt-1">79 Publicações do Dr. André Silva</p>
                 </div>
                 
                 {/* Stats - Hidden on Mobile */}

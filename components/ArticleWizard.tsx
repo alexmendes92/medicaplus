@@ -110,7 +110,7 @@ const ArticleWizard: React.FC<ArticleWizardProps> = ({ onGenerate, isGenerating,
   const stepTitles = ['Conceito', 'Persona', 'Dores', 'Estilo', 'SEO'];
 
   return (
-    <div className="flex flex-col h-full min-h-full animate-fadeIn pb-24 lg:pb-0">
+    <div className="flex flex-col h-full min-h-full animate-fadeIn pb-24 lg:pb-0 lg:h-full lg:min-h-full">
         
         {/* Progress Header */}
         <div className="mb-6 px-1 shrink-0">
@@ -123,7 +123,7 @@ const ArticleWizard: React.FC<ArticleWizardProps> = ({ onGenerate, isGenerating,
             </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto no-scrollbar px-1 pb-4">
+        <div className="flex-1 overflow-y-auto no-scrollbar px-1 pb-4 lg:flex-1">
             
             {/* Step 1: Concept */}
             {step === 1 && (
@@ -314,7 +314,7 @@ const ArticleWizard: React.FC<ArticleWizardProps> = ({ onGenerate, isGenerating,
         </div>
 
         {/* Navigation / Loading Animation - Fixed Footer Style */}
-        <div className="pt-4 border-t border-slate-100 bg-white -mx-4 px-6 pb-6 mt-auto z-10 sticky bottom-0">
+        <div className="pt-4 border-t border-slate-100 bg-white -mx-4 px-6 pb-6 mt-auto z-10 sticky bottom-0 lg:static lg:mt-auto">
              {isGenerating ? (
                  <div className="w-full flex flex-col items-center justify-center py-2 animate-fadeIn">
                      <div className="flex gap-1 mb-2">

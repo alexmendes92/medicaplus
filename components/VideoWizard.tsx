@@ -70,7 +70,7 @@ const VideoWizard: React.FC = () => {
 
   if (loading) {
       return (
-          <div className="h-full flex flex-col items-center justify-center bg-slate-950 animate-fadeIn p-8 relative overflow-hidden">
+          <div className="h-full flex flex-col items-center justify-center bg-slate-950 animate-fadeIn p-8 relative overflow-hidden lg:h-full lg:min-h-full">
               {/* Cinematic Background */}
               <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-red-950"></div>
               <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
@@ -106,7 +106,7 @@ const VideoWizard: React.FC = () => {
 
   if (scriptResult) {
       return (
-          <div className="h-full flex flex-col animate-fadeIn">
+          <div className="h-full flex flex-col animate-fadeIn lg:h-full lg:min-h-full">
               <div className="p-4 bg-slate-900 border-b border-slate-800 flex justify-between items-center text-white shrink-0">
                   <button onClick={() => setScriptResult(null)} className="text-xs font-bold text-slate-400 hover:text-white uppercase tracking-widest flex items-center gap-2">
                       <ArrowRight className="w-4 h-4 rotate-180" /> Voltar ao Studio
@@ -114,7 +114,7 @@ const VideoWizard: React.FC = () => {
                   <span className="font-bold text-sm tracking-wide bg-red-600/20 px-3 py-1 rounded-full text-red-400 border border-red-500/20">ROTEIRO FINALIZADO</span>
                   <div className="w-10"></div>
               </div>
-              <div className="flex-1 overflow-hidden bg-slate-50">
+              <div className="flex-1 overflow-hidden bg-slate-50 lg:flex-1">
                   <VideoScriptPreview script={scriptResult} />
               </div>
           </div>
@@ -123,7 +123,7 @@ const VideoWizard: React.FC = () => {
 
   if (blogResult) {
       return (
-          <div className="h-full flex flex-col animate-fadeIn">
+          <div className="h-full flex flex-col animate-fadeIn lg:h-full lg:min-h-full">
               <div className="p-4 bg-slate-900 border-b border-slate-800 flex justify-between items-center text-white shrink-0">
                   <button onClick={() => setBlogResult(null)} className="text-xs font-bold text-slate-400 hover:text-white uppercase tracking-widest flex items-center gap-2">
                       <ArrowRight className="w-4 h-4 rotate-180" /> Voltar ao Studio
@@ -131,7 +131,7 @@ const VideoWizard: React.FC = () => {
                   <span className="font-bold text-sm tracking-wide bg-purple-600/20 px-3 py-1 rounded-full text-purple-400 border border-purple-500/20">ARTIGO GERADO</span>
                   <div className="w-10"></div>
               </div>
-              <div className="flex-1 overflow-y-auto p-4 lg:p-8 bg-slate-50">
+              <div className="flex-1 overflow-y-auto p-4 lg:p-8 bg-slate-50 lg:flex-1">
                   <ArticlePreview article={blogResult} />
               </div>
           </div>
@@ -139,7 +139,7 @@ const VideoWizard: React.FC = () => {
   }
 
   return (
-    <div className="h-full min-h-full flex flex-col bg-slate-950 pb-24 lg:pb-0 animate-fadeIn relative overflow-hidden">
+    <div className="h-full min-h-full flex flex-col bg-slate-950 pb-24 lg:pb-0 animate-fadeIn relative overflow-hidden lg:h-full lg:min-h-full">
         
         {/* Background Effects */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-red-900/20 rounded-full blur-[100px] pointer-events-none"></div>
@@ -163,7 +163,7 @@ const VideoWizard: React.FC = () => {
             </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-6 relative z-10">
+        <div className="flex-1 overflow-y-auto px-6 relative z-10 lg:flex-1">
             
             {/* SCRIPT WIZARD */}
             {activeTab === 'script' && (
@@ -298,7 +298,7 @@ const VideoWizard: React.FC = () => {
         </div>
 
         {/* Fixed Footer for Actions */}
-        <div className="p-6 border-t border-slate-900 bg-slate-950 z-20 shrink-0 mt-auto sticky bottom-0">
+        <div className="p-6 border-t border-slate-900 bg-slate-950 z-20 shrink-0 mt-auto sticky bottom-0 lg:static lg:mt-auto">
             <div className="max-w-2xl mx-auto">
                 {activeTab === 'script' ? (
                     <button 

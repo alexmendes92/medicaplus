@@ -157,7 +157,7 @@ const PatientContentWizard: React.FC = () => {
                                     <Flame className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <h3 className="text-sm font-black text-slate-900 uppercase tracking-wide">Dr. Carlos Franciozi</h3>
+                                    <h3 className="text-sm font-black text-slate-900 uppercase tracking-wide">Dr. André Silva</h3>
                                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Ortopedia</p>
                                 </div>
                             </div>

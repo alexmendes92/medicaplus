@@ -44,8 +44,8 @@ const EvidenceFinder: React.FC<EvidenceFinderProps> = ({ onUseArticle }) => {
   };
 
   const isAuthorPaper = (article: PubMedArticle) => {
-      return article.abstract?.includes("[ARTIGO AUTORAL DO DR. CARLOS FRANCIOZI]") || 
-             article.authors.some(a => a?.name?.toLowerCase()?.includes('franciozi'));
+      return article.abstract?.includes("[ARTIGO AUTORAL DO DR. ANDRÉ SILVA]") || 
+             article.authors.some(a => a?.name?.toLowerCase()?.includes('silva'));
   };
 
   return (

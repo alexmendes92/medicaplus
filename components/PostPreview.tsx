@@ -142,11 +142,11 @@ const PostPreview: React.FC<PostPreviewProps> = ({
                     <div className="flex items-center gap-2">
                         <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600 p-[1.5px]">
                             <div className="w-full h-full rounded-full bg-white p-[1.5px] overflow-hidden">
-                                <img src="https://seujoelho.com/wp-content/uploads/2021/01/Dr-Carlos-Franciozi-781x1024.jpg" className="w-full h-full object-cover object-top" />
+                                <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=400&q=80" className="w-full h-full object-cover object-top" />
                             </div>
                         </div>
                         <div>
-                            <span className="text-[11px] font-bold text-slate-900 block leading-none tracking-tight">dr.carlos_franciozi</span>
+                            <span className="text-[11px] font-bold text-slate-900 block leading-none tracking-tight">dr.andre_silva</span>
                             <span className="text-[9px] text-slate-500 block leading-none mt-0.5 font-medium">Ortopedia</span>
                         </div>
                     </div>
@@ -222,7 +222,7 @@ const PostPreview: React.FC<PostPreviewProps> = ({
                                 </div>
                             ) : (
                                 <div className={`text-xs leading-relaxed text-slate-800 font-sans transition-opacity ${isRegenerating ? 'opacity-50' : 'opacity-100'}`}>
-                                    <span className="font-bold mr-1 text-slate-900">dr.carlos_franciozi</span>
+                                    <span className="font-bold mr-1 text-slate-900">dr.andre_silva</span>
                                     <span className="whitespace-pre-wrap">{editableCaption}</span>
                                     <button onClick={() => setIsEditing(true)} className="ml-1 text-[9px] text-slate-400 font-bold opacity-0 group-hover:opacity-100 transition-opacity hover:text-slate-600 uppercase tracking-wide"><Edit2 className="w-2.5 h-2.5 inline mr-0.5" /> Editar</button>
                                 </div>
